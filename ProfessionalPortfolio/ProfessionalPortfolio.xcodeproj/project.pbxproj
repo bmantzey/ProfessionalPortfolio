@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C45A43902EA9924500B02366 /* Localizable.xcstrings */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C4CE8A5F2EA6E43D00C8A3DF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C45A43902EA9924500B02366 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C4CE8A4F2EA6E43B00C8A3DF /* ProfessionalPortfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProfessionalPortfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4CE8A5E2EA6E43D00C8A3DF /* ProfessionalPortfolioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfessionalPortfolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4CE8A682EA6E43D00C8A3DF /* ProfessionalPortfolioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfessionalPortfolioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +98,7 @@
 		C4CE8A462EA6E43B00C8A3DF = {
 			isa = PBXGroup;
 			children = (
+				C45A43902EA9924500B02366 /* Localizable.xcstrings */,
 				C45A43792EA9891600B02366 /* DesignSystem */,
 				C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */,
 				C4CE8A612EA6E43D00C8A3DF /* ProfessionalPortfolioTests */,
@@ -212,6 +218,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = C4CE8A462EA6E43B00C8A3DF;
 			minimizedProjectReferenceProxies = 1;
@@ -232,6 +239,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,6 +357,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -406,6 +415,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
