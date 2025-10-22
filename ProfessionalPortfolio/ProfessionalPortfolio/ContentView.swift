@@ -10,9 +10,13 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.theme) var theme
     @Query private var items: [Item]
 
     var body: some View {
+        Button("Test") { }
+            .buttonStyle(PrimaryButtonStyle())
+            .padding()
         NavigationSplitView {
             List {
                 ForEach(items) { item in
@@ -37,6 +41,7 @@ struct ContentView: View {
         } detail: {
             Text("Select an item")
         }
+        .background()
     }
 
     private func addItem() {

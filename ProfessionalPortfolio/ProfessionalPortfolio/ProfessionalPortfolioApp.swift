@@ -26,6 +26,9 @@ struct ProfessionalPortfolioApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.theme, DefaultTheme())
+            // In any view, access the theme like this:
+            // @Environment(\.theme) var theme
         }
         .modelContainer(sharedModelContainer)
     }

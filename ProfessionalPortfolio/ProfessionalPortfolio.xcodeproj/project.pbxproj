@@ -29,9 +29,27 @@
 		C4CE8A682EA6E43D00C8A3DF /* ProfessionalPortfolioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProfessionalPortfolioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C476C84F2EA9755600C69AE1 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolioUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ProfessionalPortfolioDesignSystem.swift,
+			);
+			target = C4CE8A672EA6E43D00C8A3DF /* ProfessionalPortfolioUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C45A43792EA9891600B02366 /* DesignSystem */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
 		C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C476C84F2EA9755600C69AE1 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolioUITests" target */,
+			);
 			path = ProfessionalPortfolio;
 			sourceTree = "<group>";
 		};
@@ -75,6 +93,7 @@
 		C4CE8A462EA6E43B00C8A3DF = {
 			isa = PBXGroup;
 			children = (
+				C45A43792EA9891600B02366 /* DesignSystem */,
 				C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */,
 				C4CE8A612EA6E43D00C8A3DF /* ProfessionalPortfolioTests */,
 				C4CE8A6B2EA6E43D00C8A3DF /* ProfessionalPortfolioUITests */,
@@ -108,6 +127,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C45A43792EA9891600B02366 /* DesignSystem */,
 				C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */,
 			);
 			name = ProfessionalPortfolio;
