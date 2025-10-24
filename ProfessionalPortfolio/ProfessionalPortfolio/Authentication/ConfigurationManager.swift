@@ -13,7 +13,7 @@ struct ConfigurationManager {
     private init() {}
     
     /// Retrieves configuration values from the app bundle's Info.plist
-    private func value(for key: String) -> String? {
+    func value(for key: String) -> String? {
         return Bundle.main.infoDictionary?[key] as? String
     }
     

@@ -13,6 +13,28 @@ import FirebaseAuth
 @main
 struct ProfessionalPortfolioApp: App {
     init() {
+        // Validate configuration before Firebase setup
+        ConfigurationManager.shared.validateConfiguration()
+        configureFirebaseProgrammatically()
+    }
+    
+    private func configureFirebaseProgrammatically() {
+        guard let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let options = FirebaseOptions(contentsOfFile: path) else {
+            // Fallback to programmatic configuration if no plist file
+            let options = FirebaseOptions(
+                googleAppID: ConfigurationManager.shared.value(for: "GOOGLE_APP_ID") ?? "",
+                gcmSenderID: ConfigurationManager.shared.value(for: "GOOGLE_GCM_SENDER_ID") ?? ""
+            )
+            options.apiKey = ConfigurationManager.shared.googleAPIKey
+            options.clientID = ConfigurationManager.shared.googleClientID
+            options.projectID = ConfigurationManager.shared.firebaseProjectID
+            
+            FirebaseApp.configure(options: options)
+            return
+        }
+        
+        // Use plist file if available
         FirebaseApp.configure()
     }
     
