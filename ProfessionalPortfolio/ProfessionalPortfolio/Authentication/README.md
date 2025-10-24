@@ -9,6 +9,8 @@ This project uses Firebase for authentication and other services. To set up the 
 2. Create a new project or use an existing one
 3. Add an iOS app to your Firebase project
 4. Download the `GoogleService-Info.plist` file
+5. **IMPORTANT**: Copy the downloaded file to your project root as `GoogleService-Info.plist`
+6. **DO NOT** commit this file to Git - it's already in `.gitignore`
 
 ### 2. Secure Configuration Setup
 
@@ -47,6 +49,7 @@ The app includes a `ConfigurationManager` that validates all required configurat
 
 ## Security Notes
 - The `Secrets.xcconfig` file is in `.gitignore` and should never be committed
-- The actual `GoogleService-Info.plist` with real values should also be in `.gitignore`
-- Share configuration securely with team members through encrypted channels
+- The actual `GoogleService-Info.plist` with real values is in `.gitignore` and should never be committed
+- Use the `GoogleService-Info-Template.plist` as a reference for the required structure
+- Share configuration files securely with team members through encrypted channels
 - Use different Firebase projects for development and production
