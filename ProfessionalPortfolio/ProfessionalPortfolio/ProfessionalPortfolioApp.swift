@@ -7,9 +7,15 @@
 
 import SwiftUI
 import SwiftData
+import FirebaseCore
+import FirebaseAuth
 
 @main
 struct ProfessionalPortfolioApp: App {
+    init() {
+        FirebaseApp.configure()
+    }
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -24,6 +30,7 @@ struct ProfessionalPortfolioApp: App {
     }()
 
     var body: some Scene {
+        
         WindowGroup {
             ContentView()
                 .environment(\.theme, DefaultTheme())

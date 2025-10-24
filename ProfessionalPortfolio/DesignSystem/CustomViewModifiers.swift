@@ -26,6 +26,7 @@ struct ElevatedCardModifier: ViewModifier {
             .background(theme.backgroundTertiary)
             .cornerRadius(theme.cornerRadiusLarge)
             .shadow(color: theme.shadowColor, radius: theme.shadowRadius * 1.5, x: 0, y: 4)
+            .padding(theme.spacing12)
     }
 }
 

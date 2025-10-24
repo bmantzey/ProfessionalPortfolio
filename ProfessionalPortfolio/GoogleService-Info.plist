@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDwJ_9fL3BziB-ZhAnn_foFja000G5uD0w</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1082933848190</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>bmm.ProfessionalPortfolio</string>
+	<key>PROJECT_ID</key>
+	<string>bmantzey-portfolio</string>
+	<key>STORAGE_BUCKET</key>
+	<string>bmantzey-portfolio.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1082933848190:ios:38be0e03aa07edc0cad02f</string>
+</dict>
+</plist>
