@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  ProfessionalPortfolio
+//
+//  Configuration file for sensitive data
+//
+
+// Replace these with your actual values
+GOOGLE_API_KEY = your_actual_google_api_key_here
+GOOGLE_CLIENT_ID = your_google_client_id_here
+FIREBASE_PROJECT_ID = your_firebase_project_id
