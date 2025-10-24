@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C41604CA2EAC3885005B0565 /* ConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */; };
+		C41604D02EAC3885005B0565 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C41604BC2EAC3885005B0565 /* Config.xcconfig */; };
+		C41604D12EAC3885005B0565 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C41604BE2EAC3885005B0565 /* README.md */; };
+		C41604D22EAC3885005B0565 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C41604BF2EAC3885005B0565 /* Secrets.xcconfig */; };
+		C41604D42EAC3885005B0565 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C41604BC2EAC3885005B0565 /* Config.xcconfig */; };
+		C41604D52EAC3885005B0565 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C41604BE2EAC3885005B0565 /* README.md */; };
+		C41604D62EAC3885005B0565 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C41604BF2EAC3885005B0565 /* Secrets.xcconfig */; };
+		C41604D92EAC3885005B0565 /* ConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */; };
 		C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C45A43902EA9924500B02366 /* Localizable.xcstrings */; };
 		C4CBDA822EA9BBE80067E5B3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA812EA9BBE80067E5B3 /* FirebaseAuth */; };
 		C4CBDA842EA9BBE80067E5B3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA832EA9BBE80067E5B3 /* FirebaseFirestore */; };
@@ -35,6 +43,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C41604BC2EAC3885005B0565 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationManager.swift; sourceTree = "<group>"; };
+		C41604BE2EAC3885005B0565 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		C41604BF2EAC3885005B0565 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		C45A43902EA9924500B02366 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C4CBDA952EAADD510067E5B3 /* CLAUDE_CONTEXT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE_CONTEXT.md; sourceTree = "<group>"; };
@@ -72,11 +84,6 @@
 			membershipExceptions = (
 				Authentication/AuthenticationService.swift,
 				Authentication/AuthenticationViewModel.swift,
-				Authentication/Config.xcconfig,
-				Authentication/ConfigurationManager.swift,
-				"Authentication/GoogleService-Info-Template.plist",
-				Authentication/README.md,
-				Authentication/Secrets.xcconfig,
 			);
 			target = C4CE8A5D2EA6E43D00C8A3DF /* ProfessionalPortfolioTests */;
 		};
@@ -153,6 +160,10 @@
 				C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */,
 				C4FC215A2EAC313100424E05 /* GoogleService-Info-Template.plist */,
 				C4FC215E2EAC361100424E05 /* .gitignore */,
+				C41604BC2EAC3885005B0565 /* Config.xcconfig */,
+				C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */,
+				C41604BE2EAC3885005B0565 /* README.md */,
+				C41604BF2EAC3885005B0565 /* Secrets.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -298,6 +309,9 @@
 				C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */,
 				C4CBDA962EAADD510067E5B3 /* CLAUDE_CONTEXT.md in Resources */,
 				C4CBDA882EA9BC2F0067E5B3 /* GoogleService-Info.plist in Resources */,
+				C41604D02EAC3885005B0565 /* Config.xcconfig in Resources */,
+				C41604D12EAC3885005B0565 /* README.md in Resources */,
+				C41604D22EAC3885005B0565 /* Secrets.xcconfig in Resources */,
 				C4FC215B2EAC313100424E05 /* GoogleService-Info-Template.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -306,6 +320,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C41604D42EAC3885005B0565 /* Config.xcconfig in Resources */,
+				C41604D52EAC3885005B0565 /* README.md in Resources */,
+				C41604D62EAC3885005B0565 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,6 +340,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C41604CA2EAC3885005B0565 /* ConfigurationManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +348,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C41604D92EAC3885005B0565 /* ConfigurationManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
