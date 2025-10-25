@@ -8,11 +8,24 @@
 import Foundation
 import FirebaseAuth
 import FirebaseCore
+import SwiftUI
+
+/// Environment key for AuthenticationStateManager
+public struct AuthenticationStateManagerKey: EnvironmentKey {
+    public static let defaultValue: AuthenticationStateManager? = nil
+}
+
+public extension EnvironmentValues {
+    var authStateManager: AuthenticationStateManager? {
+        get { self[AuthenticationStateManagerKey.self] }
+        set { self[AuthenticationStateManagerKey.self] = newValue }
+    }
+}
 
 /// Manages the global authentication state for the application
 /// Listens to Firebase Auth state changes and provides observable authentication status
 @Observable
-final class AuthenticationStateManager {
+public final class AuthenticationStateManager {
     
     // MARK: - Published Properties
     
@@ -32,18 +45,41 @@ final class AuthenticationStateManager {
     
     // MARK: - Initialization
     
-    init() {
-        setupAuthStateListener()
+    public init() {
+        // Delay setup to ensure Firebase is configured
+        DispatchQueue.main.async {
+            self.setupAuthStateListener()
+        }
     }
     
     deinit {
         removeAuthStateListener()
     }
     
+    // MARK: - Public Methods
+    
+    /// Signs out the current user
+    /// - Throws: An error if sign-out fails
+    public func signOut() async throws {
+        try Auth.auth().signOut()
+        // Note: The auth state listener will automatically update our properties
+        // when Firebase notifies us of the sign-out
+    }
+    
     // MARK: - Private Methods
     
     /// Sets up the Firebase authentication state listener
     private func setupAuthStateListener() {
+        // Ensure Firebase is configured before setting up listener
+        guard FirebaseApp.app() != nil else {
+            print("⚠️ Firebase not configured yet. AuthenticationStateManager will retry setup.")
+            // Set a flag to retry setup later if needed
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.setupAuthStateListener()
+            }
+            return
+        }
+        
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
             DispatchQueue.main.async {
                 self?.handleAuthStateChange(user: user)

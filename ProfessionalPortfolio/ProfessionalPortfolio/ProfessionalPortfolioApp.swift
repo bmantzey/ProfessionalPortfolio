@@ -57,6 +57,7 @@ struct ProfessionalPortfolioApp: App {
                     } else if manager.isAuthenticated {
                         // User is authenticated - show main app
                         MainApp()
+                            .environment(\.authStateManager, manager)
                     } else {
                         // User is not authenticated - show authentication view
                         AuthenticationView(authService: FirebaseAuthenticationService())
