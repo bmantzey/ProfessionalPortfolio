@@ -15,6 +15,10 @@ struct AuthenticationView: View {
         _viewModel = State(initialValue: AuthenticationViewModel(auth: authService))
     }
     
+    init(viewModel: AuthenticationViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+    
     var body: some View {
         VStack(spacing: theme.spacing32) {
             headerSection

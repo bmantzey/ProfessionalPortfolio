@@ -25,6 +25,11 @@ final class FirebaseAuthenticationService: AuthenticationService {
     func signUp(email: String, password: String) async throws -> Bool {
         do {
             let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
+            
+            // Firebase automatically signs in after account creation, but we want the user
+            // to explicitly sign in, so we sign them out immediately
+            try Auth.auth().signOut()
+            
             return authResult.user.uid.isEmpty == false
         } catch let authError as NSError {
             throw mapFirebaseError(authError)

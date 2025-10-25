@@ -14,6 +14,8 @@ import FirebaseAuth
 struct ProfessionalPortfolioApp: App {
     // Authentication state manager - created after Firebase configuration
     @State private var authStateManager: AuthenticationStateManager?
+    // Persistent authentication view model to prevent recreation
+    @State private var authViewModel: AuthenticationViewModel?
     
     init() {
         // Configure Firebase using GoogleService-Info.plist
@@ -24,6 +26,9 @@ struct ProfessionalPortfolioApp: App {
         
         // Create auth state manager after Firebase is configured
         _authStateManager = State(initialValue: AuthenticationStateManager())
+        
+        // Create persistent auth view model
+        _authViewModel = State(initialValue: AuthenticationViewModel(auth: FirebaseAuthenticationService()))
     }
     
     private func configureFirebase() {
@@ -48,7 +53,7 @@ struct ProfessionalPortfolioApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if let manager = authStateManager {
+                if let manager = authStateManager, let viewModel = authViewModel {
                     if manager.isCheckingAuthState {
                         // Show loading while checking auth state
                         ProgressView("Loading...")
@@ -59,8 +64,8 @@ struct ProfessionalPortfolioApp: App {
                         MainApp()
                             .environment(\.authStateManager, manager)
                     } else {
-                        // User is not authenticated - show authentication view
-                        AuthenticationView(authService: FirebaseAuthenticationService())
+                        // User is not authenticated - show authentication view with persistent ViewModel
+                        AuthenticationView(viewModel: viewModel)
                     }
                 } else {
                     // Firebase/Manager not ready yet

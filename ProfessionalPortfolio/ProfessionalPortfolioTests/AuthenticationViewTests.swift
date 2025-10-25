@@ -442,4 +442,97 @@ struct AuthenticationViewTests {
         #expect(viewModel.errorMessage != nil, "Should show error message")
         #expect(viewModel.errorMessage?.contains("stronger") == true, "Error should mention stronger password")
     }
+    
+    @Test("Toggle mode switches between sign-in and sign-up")
+    @MainActor
+    func toggleModeSwitchesBetweenSignInAndSignUp() async throws {
+        // Given
+        let mockAuth = MockAuthenticationService()
+        let viewModel = AuthenticationViewModel(auth: mockAuth)
+        #expect(viewModel.isSignUpMode == false, "Should start in sign-in mode")
+        
+        // When - Toggle to sign-up
+        viewModel.toggleMode()
+        
+        // Then
+        #expect(viewModel.isSignUpMode == true, "Should switch to sign-up mode")
+        #expect(viewModel.confirmPassword.isEmpty, "Should clear confirm password")
+        #expect(viewModel.errorMessage == nil, "Should clear error message")
+        
+        // When - Toggle back to sign-in
+        viewModel.toggleMode()
+        
+        // Then
+        #expect(viewModel.isSignUpMode == false, "Should switch back to sign-in mode")
+        #expect(viewModel.confirmPassword.isEmpty, "Should keep confirm password cleared")
+        #expect(viewModel.errorMessage == nil, "Should keep error message cleared")
+    }
+    
+    @Test("Toggle mode clears form state appropriately")
+    @MainActor
+    func toggleModeClearsFormStateAppropriately() async throws {
+        // Given
+        let mockAuth = MockAuthenticationService()
+        let viewModel = AuthenticationViewModel(auth: mockAuth)
+        viewModel.isSignUpMode = true
+        viewModel.confirmPassword = "somePassword"
+        viewModel.errorMessage = "Some error"
+        
+        // When
+        viewModel.toggleMode()
+        
+        // Then
+        #expect(viewModel.isSignUpMode == false, "Should toggle mode")
+        #expect(viewModel.confirmPassword.isEmpty, "Should clear confirm password")
+        #expect(viewModel.errorMessage == nil, "Should clear error message")
+    }
+    
+    @Test("Successful sign-up switches to sign-in mode and preserves email")
+    @MainActor
+    func successfulSignUpSwitchesToSignInModeAndPreservesEmail() async throws {
+        // Given
+        let mockAuth = MockAuthenticationService()
+        mockAuth.shouldSignUpSucceed = true
+        let viewModel = AuthenticationViewModel(auth: mockAuth)
+        
+        viewModel.isSignUpMode = true
+        viewModel.email = "test@example.com"
+        viewModel.password = "StrongPass123!"
+        viewModel.confirmPassword = "StrongPass123!"
+        
+        // When
+        await viewModel.signUp()
+        
+        // Then
+        #expect(viewModel.isSignUpMode == false, "Should switch to sign-in mode after successful sign-up")
+        #expect(viewModel.email == "test@example.com", "Should preserve email address")
+        #expect(viewModel.password.isEmpty, "Should clear password for security")
+        #expect(viewModel.confirmPassword.isEmpty, "Should clear confirm password")
+        #expect(viewModel.errorMessage == nil, "Should have no error message")
+        #expect(viewModel.isAuthenticated == false, "Should NOT be authenticated after sign-up")
+    }
+    
+    @Test("Failed sign-up stays in sign-up mode")
+    @MainActor
+    func failedSignUpStaysInSignUpMode() async throws {
+        // Given
+        let mockAuth = MockAuthenticationService()
+        mockAuth.shouldSignUpSucceed = false
+        let viewModel = AuthenticationViewModel(auth: mockAuth)
+        
+        viewModel.isSignUpMode = true
+        viewModel.email = "test@example.com"
+        viewModel.password = "StrongPass123!"
+        viewModel.confirmPassword = "StrongPass123!"
+        
+        // When
+        await viewModel.signUp()
+        
+        // Then
+        #expect(viewModel.isSignUpMode == true, "Should stay in sign-up mode after failed sign-up")
+        #expect(viewModel.email == "test@example.com", "Should preserve email address")
+        #expect(viewModel.password == "StrongPass123!", "Should preserve password for retry")
+        #expect(viewModel.errorMessage != nil, "Should show error message")
+        #expect(viewModel.isAuthenticated == false, "Should not be authenticated after failed sign-up")
+    }
 }

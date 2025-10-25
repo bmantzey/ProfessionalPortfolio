@@ -144,12 +144,13 @@ final class AuthenticationViewModel {
             let success = try await auth.signUp(email: emailTrimmed, password: password)
             
             if success {
-                // Successfully created account, switch back to sign-in mode
+                // Successfully created account, switch to sign-in mode
                 isSignUpMode = false
-                password = ""
+                password = ""  // Clear password for security - user must re-enter
                 confirmPassword = ""
                 errorMessage = nil
-                // Note: We don't set isAuthenticated = true here because they need to sign in
+                // Note: Keep email populated for convenience
+                // Note: User is NOT authenticated - they must sign in with their new account
             } else {
                 errorMessage = "Failed to create account. Please try again."
             }
