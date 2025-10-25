@@ -42,7 +42,7 @@ struct ProfessionalPortfolioApp: App {
     var body: some Scene {
         
         WindowGroup {
-            ContentView()
+            AuthenticationView(authService: FirebaseAuthenticationService())
                 .environment(\.theme, DefaultTheme())
             // In any view, access the theme like this:
             // @Environment(\.theme) var theme
