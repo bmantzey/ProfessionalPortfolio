@@ -91,9 +91,6 @@ final class AuthenticationViewModel {
         defer { isSigningIn = false }
 
         do {
-            // Simulate async work
-            try await Task.sleep(nanoseconds: 300_000_000)
-            
             let success = try await auth.signIn(email: emailTrimmed, password: password)
             isAuthenticated = success
             
@@ -102,7 +99,7 @@ final class AuthenticationViewModel {
             }
         } catch {
             isAuthenticated = false
-            errorMessage = "Failed to sign in. Please try again."
+            errorMessage = error.localizedDescription
         }
     }
     
@@ -144,9 +141,6 @@ final class AuthenticationViewModel {
         let emailTrimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
         do {
-            // Simulate async work
-            try await Task.sleep(nanoseconds: 300_000_000)
-            
             let success = try await auth.signUp(email: emailTrimmed, password: password)
             
             if success {
@@ -161,7 +155,7 @@ final class AuthenticationViewModel {
             }
         } catch {
             isAuthenticated = false
-            errorMessage = "Failed to create account. Please try again."
+            errorMessage = error.localizedDescription
         }
     }
     
