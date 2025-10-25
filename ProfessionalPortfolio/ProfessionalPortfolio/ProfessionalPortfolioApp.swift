@@ -56,7 +56,7 @@ struct ProfessionalPortfolioApp: App {
                             .background(Color(.systemBackground))
                     } else if manager.isAuthenticated {
                         // User is authenticated - show main app
-                        ContentView()
+                        MainApp()
                     } else {
                         // User is not authenticated - show authentication view
                         AuthenticationView(authService: FirebaseAuthenticationService())

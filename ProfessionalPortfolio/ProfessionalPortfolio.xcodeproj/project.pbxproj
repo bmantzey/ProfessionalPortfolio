@@ -84,6 +84,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C416052D2EAD6E26005B0565 /* MainApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MainApp;
+			sourceTree = "<group>";
+		};
 		C45A43792EA9891600B02366 /* DesignSystem */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -144,6 +149,7 @@
 		C4CE8A462EA6E43B00C8A3DF = {
 			isa = PBXGroup;
 			children = (
+				C416052D2EAD6E26005B0565 /* MainApp */,
 				C4CBDA952EAADD510067E5B3 /* CLAUDE_CONTEXT.md */,
 				C45A43902EA9924500B02366 /* Localizable.xcstrings */,
 				C45A43792EA9891600B02366 /* DesignSystem */,
@@ -185,6 +191,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C416052D2EAD6E26005B0565 /* MainApp */,
 				C45A43792EA9891600B02366 /* DesignSystem */,
 				C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */,
 			);
