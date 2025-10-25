@@ -35,38 +35,11 @@ final class AuthenticationViewModel {
     
     var isEmailValid: Bool {
         let emailTrimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@",
+                                       "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")
+        let passesEmailValidation = emailPredicate.evaluate(with: emailTrimmed)
         
-        // Basic validation checks
-        guard !emailTrimmed.isEmpty else { return false }
-        guard !emailTrimmed.contains(" ") else { return false } // No spaces
-        guard emailTrimmed.contains("@") else { return false } // Must have @
-        
-        let parts = emailTrimmed.components(separatedBy: "@")
-        guard parts.count == 2 else { return false } // Exactly one @
-        
-        let localPart = parts[0]
-        let domainPart = parts[1]
-        
-        // Local part validation
-        guard !localPart.isEmpty else { return false }
-        guard !localPart.hasPrefix(".") && !localPart.hasSuffix(".") else { return false }
-        
-        // Domain part validation
-        guard !domainPart.isEmpty else { return false }
-        guard domainPart.contains(".") else { return false } // Must have at least one dot
-        guard !domainPart.hasPrefix(".") && !domainPart.hasSuffix(".") else { return false }
-        guard !domainPart.hasPrefix("-") && !domainPart.hasSuffix("-") else { return false }
-        
-        let domainComponents = domainPart.components(separatedBy: ".")
-        guard domainComponents.count >= 2 else { return false }
-        guard domainComponents.last?.count ?? 0 >= 2 else { return false } // TLD at least 2 chars
-        
-        // All domain components should be non-empty
-        for component in domainComponents {
-            guard !component.isEmpty else { return false }
-        }
-        
-        return true
+        return !emailTrimmed.isEmpty && passesEmailValidation
     }
     
     var isPasswordValid: Bool {
@@ -133,6 +106,13 @@ final class AuthenticationViewModel {
     @MainActor
     func toggleMode() {
         isSignUpMode.toggle()
+        confirmPassword = ""
+        errorMessage = nil
+    }
+    
+    @MainActor
+    func clearSensitiveData() {
+        password = ""
         confirmPassword = ""
         errorMessage = nil
     }

@@ -37,7 +37,6 @@ struct ProfessionalPortfolioApp: App {
         FirebaseApp.configure()
     }
     
-    // Temporary Code stubbing out SwiftData integration.
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -67,6 +66,10 @@ struct ProfessionalPortfolioApp: App {
                     } else {
                         // User is not authenticated - show authentication view with persistent ViewModel
                         AuthenticationView(viewModel: viewModel)
+                            .onAppear {
+                                // Clear sensitive data when returning to auth view
+                                viewModel.clearSensitiveData()
+                            }
                     }
                 } else {
                     // Firebase/Manager not ready yet

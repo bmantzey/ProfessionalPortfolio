@@ -201,8 +201,10 @@ final class FirebaseAuthenticationService: AuthenticationService {
                 throw FirebaseAuthenticationError.internalError
             }
             
-            // Note: We let the account remain signed in after creation
-            // The AuthenticationStateManager and ViewModel will handle the flow
+            // Note: Firebase automatically signs in after account creation, but we want the user
+            // to explicitly sign in, so we sign them out immediately
+            try Auth.auth().signOut()
+            
             return true
         }
         
