@@ -7,123 +7,126 @@
 
 import SwiftUI
 
-struct AuthenticationView: View {
-    @Environment(\.theme) private var theme
-    @State private var viewModel: AuthenticationViewModel
-    
-    init(authService: AuthenticationService) {
-        _viewModel = State(initialValue: AuthenticationViewModel(auth: authService))
-    }
-    
-    init(viewModel: AuthenticationViewModel) {
-        _viewModel = State(initialValue: viewModel)
-    }
+// MARK: - Reusable Components
+
+private struct AuthenticationHeader: View {
+    let isSignUpMode: Bool
     
     var body: some View {
-        VStack(spacing: theme.spacing32) {
-            headerSection
+        VStack(spacing: 8) {
+            Text(isSignUpMode ? "Create Account" : "Welcome")
+                .font(.largeTitle)
+                .fontWeight(.bold)
             
-            VStack(spacing: theme.spacing24) {
-                formFields
-                signInButton
-                
-                if !viewModel.isSignUpMode {
-                    accountToggleSection
-                }
-            }
-            .padding(theme.spacing24) // Internal padding INSIDE the card
-            .elevatedCard()
-            
-            if let errorMessage = viewModel.errorMessage {
-                errorSection(errorMessage)
-            }
-            
-            Spacer()
+            Text(isSignUpMode ? "Sign up to get started" : "Please sign in to continue")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
-        .padding(theme.spacing24) // Reduced from 32 to match card padding
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    theme.backgroundTertiary,
-                    theme.backgroundPrimary
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .animation(.easeInOut(duration: 0.3), value: viewModel.errorMessage)
-        .animation(.easeInOut(duration: 0.2), value: viewModel.isEmailValid)
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isSignUpMode)
+        .animation(.easeInOut(duration: 0.3), value: isSignUpMode)
     }
+}
+
+private struct AuthenticationFormFields: View {
+    @Binding var viewModel: AuthenticationViewModel
     
-    // MARK: - View Components
-    
-    private var headerSection: some View {
-        VStack(spacing: theme.spacing8) {
-            Text(viewModel.isSignUpMode ? "Create Account" : "Welcome")
-                .font(theme.largeTitle)
-                .foregroundColor(theme.primaryDark)
-            
-            Text(viewModel.isSignUpMode ? "Sign up to get started" : "Please sign in to continue")
-                .font(theme.subheadline)
-                .foregroundColor(theme.textSecondary)
-        }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.isSignUpMode)
-    }
-    
-    private var formFields: some View {
-        VStack(spacing: theme.spacing16) {
-            ThemedTextField(
-                title: "Email Address",
-                placeholder: "Enter your email",
-                text: $viewModel.email,
-                keyboardType: .emailAddress,
-                autocapitalization: .never,
-                errorMessage: emailErrorMessage
-            )
-            .onChange(of: viewModel.email) {
-                viewModel.validateEmailAndClearPasswordIfNeeded()
-            }
-            
-            ThemedTextField(
-                title: "Password",
-                placeholder: viewModel.isEmailValid ? "Enter your password" : "Complete email first",
-                text: $viewModel.password,
-                isSecure: true,
-                errorMessage: passwordErrorMessage
-            )
-            .disabled(!viewModel.isEmailValid)
-            .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
+    var body: some View {
+        VStack(spacing: 16) {
+            EmailField(viewModel: $viewModel)
+            PasswordField(viewModel: $viewModel)
             
             if viewModel.isSignUpMode {
-                ThemedTextField(
-                    title: "Confirm Password",
-                    placeholder: "Confirm your password",
-                    text: $viewModel.confirmPassword,
-                    isSecure: true,
-                    errorMessage: confirmPasswordErrorMessage
-                )
-                .disabled(!viewModel.isEmailValid)
-                .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                ConfirmPasswordField(viewModel: $viewModel)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }
+}
+
+private struct EmailField: View {
+    @Binding var viewModel: AuthenticationViewModel
     
-    private var signInButton: some View {
+    var body: some View {
+        ThemedTextField(
+            title: "Email Address",
+            placeholder: "Enter your email",
+            text: $viewModel.email,
+            keyboardType: .emailAddress,
+            autocapitalization: .never,
+            errorMessage: emailErrorMessage
+        )
+        .onChange(of: viewModel.email) {
+            viewModel.validateEmailAndClearPasswordIfNeeded()
+        }
+    }
+    
+    private var emailErrorMessage: String? {
+        guard !viewModel.email.isEmpty && !viewModel.isEmailValid else { return nil }
+        return "Please enter a valid email address"
+    }
+}
+
+private struct PasswordField: View {
+    @Binding var viewModel: AuthenticationViewModel
+    
+    var body: some View {
+        ThemedTextField(
+            title: "Password",
+            placeholder: viewModel.isEmailValid ? "Enter your password" : "Complete email first",
+            text: $viewModel.password,
+            isSecure: true,
+            errorMessage: passwordErrorMessage
+        )
+        .disabled(!viewModel.isEmailValid)
+        .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
+    }
+    
+    private var passwordErrorMessage: String? {
+        // In sign-up mode, show password strength validation
+        if viewModel.isSignUpMode && !viewModel.password.isEmpty {
+            return viewModel.passwordValidationMessage
+        }
+        // In sign-in mode or empty email, show basic validation
+        guard !viewModel.isEmailValid && !viewModel.email.isEmpty else { return nil }
+        return "Complete your email address first"
+    }
+}
+
+private struct ConfirmPasswordField: View {
+    @Binding var viewModel: AuthenticationViewModel
+    
+    var body: some View {
+        ThemedTextField(
+            title: "Confirm Password",
+            placeholder: "Confirm your password",
+            text: $viewModel.confirmPassword,
+            isSecure: true,
+            errorMessage: confirmPasswordErrorMessage
+        )
+        .disabled(!viewModel.isEmailValid)
+        .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
+    }
+    
+    private var confirmPasswordErrorMessage: String? {
+        guard viewModel.isSignUpMode else { return nil }
+        guard !viewModel.confirmPassword.isEmpty else { return nil }
+        guard viewModel.password != viewModel.confirmPassword else { return nil }
+        return "Passwords don't match"
+    }
+}
+
+private struct AuthenticationButton: View {
+    @Binding var viewModel: AuthenticationViewModel
+    
+    var body: some View {
         Button {
             Task {
-                if viewModel.isSignUpMode {
-                    await viewModel.signUp()
-                } else {
-                    await viewModel.signIn()
-                }
+                await performAuthAction()
             }
         } label: {
-            HStack(spacing: theme.spacing8) {
+            HStack(spacing: 8) {
                 if viewModel.isSigningIn {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: theme.textOnPrimary))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         .scaleEffect(0.8)
                 }
                 
@@ -147,11 +150,23 @@ struct AuthenticationView: View {
         return viewModel.isSignUpMode ? viewModel.canSignUp : viewModel.canSignIn
     }
     
-    private var accountToggleSection: some View {
-        HStack(spacing: theme.spacing4) {
+    private func performAuthAction() async {
+        if viewModel.isSignUpMode {
+            await viewModel.signUp()
+        } else {
+            await viewModel.signIn()
+        }
+    }
+}
+
+private struct AccountToggleSection: View {
+    @Binding var viewModel: AuthenticationViewModel
+    
+    var body: some View {
+        HStack(spacing: 4) {
             Text("Don't have an account?")
-                .font(theme.callout)
-                .foregroundColor(theme.textSecondary)
+                .font(.callout)
+                .foregroundStyle(.secondary)
             
             Button("Create one") {
                 withAnimation(.easeInOut(duration: 0.3)) {
@@ -160,48 +175,79 @@ struct AuthenticationView: View {
             }
             .buttonStyle(TextButtonStyle())
         }
-        .padding(.top, theme.spacing16) // More space from button above
+        .padding(.top, 16)
     }
+}
+
+private struct ErrorDisplayView: View {
+    let message: String
     
-    private func errorSection(_ message: String) -> some View {
-        HStack(spacing: theme.spacing8) {
+    var body: some View {
+        HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(theme.caption)
-                .foregroundColor(theme.accentError)
+                .font(.caption)
+                .foregroundStyle(.red)
             
             Text(message)
-                .font(theme.caption)
-                .foregroundColor(theme.accentError)
+                .font(.caption)
+                .foregroundStyle(.red)
                 .multilineTextAlignment(.leading)
         }
-        .padding(theme.spacing12)
-        .background(theme.accentError.opacity(0.1))
-        .cornerRadius(theme.cornerRadiusSmall)
+        .padding(12)
+        .background(.red.opacity(0.1))
+        .cornerRadius(8)
         .transition(.opacity.combined(with: .move(edge: .top)))
     }
+}
+
+struct AuthenticationView: View {
+    @Environment(\.theme) private var theme
+    @State private var viewModel: AuthenticationViewModel
     
-    // MARK: - Computed Properties
-    
-    private var emailErrorMessage: String? {
-        guard !viewModel.email.isEmpty && !viewModel.isEmailValid else { return nil }
-        return "Please enter a valid email address"
+    init(authService: AuthenticationService) {
+        _viewModel = State(initialValue: AuthenticationViewModel(auth: authService))
     }
     
-    private var passwordErrorMessage: String? {
-        // In sign-up mode, show password strength validation
-        if viewModel.isSignUpMode && !viewModel.password.isEmpty {
-            return viewModel.passwordValidationMessage
+    init(viewModel: AuthenticationViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+    
+    var body: some View {
+        VStack(spacing: theme.spacing32) {
+            AuthenticationHeader(isSignUpMode: viewModel.isSignUpMode)
+            
+            VStack(spacing: theme.spacing24) {
+                AuthenticationFormFields(viewModel: $viewModel)
+                AuthenticationButton(viewModel: $viewModel)
+                
+                if !viewModel.isSignUpMode {
+                    AccountToggleSection(viewModel: $viewModel)
+                }
+            }
+            .padding(theme.spacing24)
+            .elevatedCard()
+            
+            if let errorMessage = viewModel.errorMessage {
+                ErrorDisplayView(message: errorMessage)
+            }
+            
+            Spacer()
         }
-        // In sign-in mode or empty email, show basic validation
-        guard !viewModel.isEmailValid && !viewModel.email.isEmpty else { return nil }
-        return "Complete your email address first"
+        .padding(theme.spacing24)
+        .background(authenticationBackground)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.errorMessage)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isSignUpMode)
     }
     
-    private var confirmPasswordErrorMessage: String? {
-        guard viewModel.isSignUpMode else { return nil }
-        guard !viewModel.confirmPassword.isEmpty else { return nil }
-        guard viewModel.password != viewModel.confirmPassword else { return nil }
-        return "Passwords don't match"
+    private var authenticationBackground: some View {
+        LinearGradient(
+            gradient: Gradient(colors: [
+                theme.backgroundTertiary,
+                theme.backgroundPrimary
+            ]),
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 }
 
@@ -210,22 +256,12 @@ struct AuthenticationView: View {
 struct AuthenticationView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            // Default state (sign-in)
             AuthenticationView(authService: PreviewMockAuthService())
                 .previewDisplayName("Sign In")
             
-            // Sign-up mode
-            AuthenticationView(authService: PreviewMockAuthService())
-                .onAppear {
-                    // Note: This won't actually work in preview, but shows intent
-                }
-                .previewDisplayName("Sign Up Mode")
-            
-            // Loading state
             AuthenticationView(authService: PreviewMockAuthService(simulateLoading: true))
                 .previewDisplayName("Loading")
             
-            // Error state
             AuthenticationView(authService: PreviewMockAuthService(shouldFail: true))
                 .previewDisplayName("Error State")
         }
@@ -244,30 +280,43 @@ private class PreviewMockAuthService: AuthenticationService {
     }
     
     func signIn(email: String, password: String) async throws -> Bool {
-        if simulateLoading {
-            try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds for preview
-        } else {
-            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second delay
-        }
+        await simulateDelay()
         
         if shouldFail {
-            throw NSError(domain: "Preview", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid credentials. Please try again."])
+            throw AuthenticationError.invalidCredentials
         }
         
-        return password != "wrong"
+        return true
     }
     
     func signUp(email: String, password: String) async throws -> Bool {
-        if simulateLoading {
-            try await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds for preview
-        } else {
-            try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second delay
-        }
+        await simulateDelay()
         
         if shouldFail {
-            throw NSError(domain: "Preview", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create account. Please try again."])
+            throw AuthenticationError.accountCreationFailed
         }
         
-        return password != "exists"
+        return true
+    }
+    
+    private func simulateDelay() async {
+        let delay = simulateLoading ? 3_000_000_000 : 500_000_000 // 3s or 0.5s
+        try? await Task.sleep(nanoseconds: UInt64(delay))
+    }
+}
+
+// MARK: - Authentication Errors
+
+private enum AuthenticationError: LocalizedError {
+    case invalidCredentials
+    case accountCreationFailed
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidCredentials:
+            return "Invalid credentials. Please try again."
+        case .accountCreationFailed:
+            return "Failed to create account. Please try again."
+        }
     }
 }

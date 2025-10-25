@@ -52,6 +52,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C416054F2EAD8927005B0565 /* Exceptions for "ProfessionalPortfolioUITests" folder in "ProfessionalPortfolioUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ProfessionalPortfolioUITests.swift,
+				ProfessionalPortfolioUITestsLaunchTests.swift,
+			);
+			target = C4CE8A672EA6E43D00C8A3DF /* ProfessionalPortfolioUITests */;
+		};
 		C47014F92EAAE1D80030A3FA /* Exceptions for "DesignSystem" folder in "ProfessionalPortfolioUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -108,6 +116,9 @@
 		};
 		C4CE8A6B2EA6E43D00C8A3DF /* ProfessionalPortfolioUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C416054F2EAD8927005B0565 /* Exceptions for "ProfessionalPortfolioUITests" folder in "ProfessionalPortfolioUITests" target */,
+			);
 			path = ProfessionalPortfolioUITests;
 			sourceTree = "<group>";
 		};

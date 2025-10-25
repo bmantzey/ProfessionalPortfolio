@@ -46,10 +46,7 @@ public final class AuthenticationStateManager {
     // MARK: - Initialization
     
     public init() {
-        // Delay setup to ensure Firebase is configured
-        DispatchQueue.main.async {
-            self.setupAuthStateListener()
-        }
+        setupAuthStateListener()
     }
     
     deinit {
@@ -61,9 +58,24 @@ public final class AuthenticationStateManager {
     /// Signs out the current user
     /// - Throws: An error if sign-out fails
     public func signOut() async throws {
-        try Auth.auth().signOut()
-        // Note: The auth state listener will automatically update our properties
-        // when Firebase notifies us of the sign-out
+        do {
+            try Auth.auth().signOut()
+            // Note: The auth state listener will automatically update our properties
+            // when Firebase notifies us of the sign-out
+        } catch {
+            print("⚠️ Sign out failed: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    /// Manually retry setting up the auth state listener
+    /// Call this if Firebase wasn't configured during initialization
+    public func retrySetup() {
+        guard authStateHandle == nil else {
+            print("⚠️ Auth state listener already configured")
+            return
+        }
+        setupAuthStateListener()
     }
     
     // MARK: - Private Methods
@@ -72,11 +84,7 @@ public final class AuthenticationStateManager {
     private func setupAuthStateListener() {
         // Ensure Firebase is configured before setting up listener
         guard FirebaseApp.app() != nil else {
-            print("⚠️ Firebase not configured yet. AuthenticationStateManager will retry setup.")
-            // Set a flag to retry setup later if needed
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.setupAuthStateListener()
-            }
+            print("⚠️ Firebase not configured. Unable to set up AuthenticationStateManager.")
             return
         }
         
@@ -89,7 +97,6 @@ public final class AuthenticationStateManager {
     
     /// Handles Firebase authentication state changes
     /// - Parameter user: The Firebase user object, or nil if not authenticated
-    @MainActor
     private func handleAuthStateChange(user: User?) {
         // Update authentication state
         isAuthenticated = user != nil

@@ -37,6 +37,7 @@ struct ProfessionalPortfolioApp: App {
         FirebaseApp.configure()
     }
     
+    // Temporary Code stubbing out SwiftData integration.
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
