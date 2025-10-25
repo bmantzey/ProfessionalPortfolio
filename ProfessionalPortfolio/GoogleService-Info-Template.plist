@@ -2,22 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>$(GOOGLE_CLIENT_ID)</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+	<!-- 
+	This is a TEMPLATE file showing the structure of GoogleService-Info.plist
+	Replace these placeholder values with your actual Firebase project values
+	DO NOT commit the real GoogleService-Info.plist file to version control!
+	-->
 	<key>API_KEY</key>
-	<string>$(GOOGLE_API_KEY)</string>
+	<string>your-api-key-here</string>
 	<key>GCM_SENDER_ID</key>
-	<string>$(GOOGLE_GCM_SENDER_ID)</string>
+	<string>your-gcm-sender-id</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.yourcompany.yourapp</string>
 	<key>PROJECT_ID</key>
-	<string>$(FIREBASE_PROJECT_ID)</string>
+	<string>your-firebase-project-id</string>
 	<key>STORAGE_BUCKET</key>
-	<string>$(FIREBASE_PROJECT_ID).appspot.com</string>
+	<string>your-firebase-project-id.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +30,10 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>$(GOOGLE_APP_ID)</string>
+	<string>your-google-app-id</string>
+	<key>CLIENT_ID</key>
+	<string>your-client-id.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.your-reversed-client-id</string>
 </dict>
 </plist>
