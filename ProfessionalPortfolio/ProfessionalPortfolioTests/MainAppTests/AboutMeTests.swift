@@ -1,5 +1,5 @@
 //
-//  MainAppTests.swift
+//  AboutMeTests.swift
 //  ProfessionalPortfolioTests
 //
 //  Created by Brandon Mantzey on 10/25/25.
@@ -11,7 +11,7 @@ import FirebaseAuth
 
 // MARK: - Mock Authentication State Manager
 
-/// A mock authentication state manager for testing MainApp sign-out functionality
+/// A mock authentication state manager for testing AboutMe sign-out functionality
 @Observable
 final class MockAuthenticationStateManager {
     var isAuthenticated: Bool = true
@@ -41,10 +41,10 @@ final class MockAuthenticationStateManager {
     }
 }
 
-// MARK: - MainApp Tests
+// MARK: - AboutMe Tests
 
-@Suite("MainApp Tests")
-struct MainAppTests {
+@Suite("AboutMe Tests")
+struct AboutMeTests {
     
     @Test("Sign out calls authentication state manager")
     @MainActor

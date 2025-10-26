@@ -60,8 +60,8 @@ struct ProfessionalPortfolioApp: App {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(Color(.systemBackground))
                     } else if manager.isAuthenticated {
-                        // User is authenticated - show main app
-                        MainApp()
+                        // User is authenticated - show main app with tab system
+                        PortfolioTabView()
                             .environment(\.authStateManager, manager)
                     } else {
                         // User is not authenticated - show authentication view with persistent ViewModel
