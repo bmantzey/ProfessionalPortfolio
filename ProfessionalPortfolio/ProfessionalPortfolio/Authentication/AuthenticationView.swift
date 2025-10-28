@@ -79,7 +79,7 @@ struct AuthenticationView: View {
                 errorMessage: emailErrorMessage
             )
             .onChange(of: viewModel.email) {
-                viewModel.validateEmailAndClearPasswordIfNeeded()
+                viewModel.onEmailChanged()
             }
             
             ThemedTextField(
@@ -89,8 +89,7 @@ struct AuthenticationView: View {
                 isSecure: true,
                 errorMessage: passwordErrorMessage
             )
-            .disabled(!viewModel.isEmailValid)
-            .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.isEmailValid)
             
             if viewModel.isSignUpMode {
                 ThemedTextField(
@@ -100,8 +99,6 @@ struct AuthenticationView: View {
                     isSecure: true,
                     errorMessage: confirmPasswordErrorMessage
                 )
-                .disabled(!viewModel.isEmailValid)
-                .opacity(viewModel.isEmailValid ? 1.0 : 0.6)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -189,9 +186,10 @@ struct AuthenticationView: View {
         if viewModel.isSignUpMode && !viewModel.password.isEmpty {
             return viewModel.passwordValidationMessage
         }
-        // In sign-in mode or empty email, show basic validation
-        guard !viewModel.isEmailValid && !viewModel.email.isEmpty else { return nil }
-        return "Complete your email address first"
+        
+        // Don't show "complete email first" error unless user is actively trying to use the password field
+        // This prevents confusing error messages during normal typing flow
+        return nil
     }
     
     private var confirmPasswordErrorMessage: String? {

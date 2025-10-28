@@ -77,4 +77,22 @@ struct AboutMeTests {
         #expect(mockAuthManager.currentUser == nil, "Should clear current user")
         #expect(mockAuthManager.signOutWasCalled == true, "Should have called signOut method")
     }
+    
+    @Test("Sign out handles authentication manager failure")
+    @MainActor
+    func signOutHandlesAuthenticationFailure() async throws {
+        // Given
+        let expectedError = NSError(domain: "TestError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Sign out failed"])
+        let mockAuthManager = MockAuthenticationStateManager(shouldSucceed: false, error: expectedError)
+        mockAuthManager.isAuthenticated = true
+        
+        // When/Then
+        await #expect(throws: Error.self) {
+            try await mockAuthManager.signOut()
+        }
+        
+        // Should still call signOut even if it fails
+        #expect(mockAuthManager.signOutWasCalled == true, "Should have attempted signOut")
+        #expect(mockAuthManager.isAuthenticated == true, "Should remain authenticated on failure")
+    }
 }

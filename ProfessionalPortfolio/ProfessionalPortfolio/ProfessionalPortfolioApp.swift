@@ -25,10 +25,11 @@ struct ProfessionalPortfolioApp: App {
         ConfigurationManager.shared.validateConfiguration()
         
         // Create auth state manager after Firebase is configured
-        _authStateManager = State(initialValue: AuthenticationStateManager())
+        let manager = AuthenticationStateManager()
+        _authStateManager = State(initialValue: manager)
         
-        // Create persistent auth view model
-        _authViewModel = State(initialValue: AuthenticationViewModel(auth: FirebaseAuthenticationService()))
+        // Create persistent auth view model with the auth state manager
+        _authViewModel = State(initialValue: AuthenticationViewModel(auth: FirebaseAuthenticationService(authStateManager: manager)))
     }
     
     private func configureFirebase() {

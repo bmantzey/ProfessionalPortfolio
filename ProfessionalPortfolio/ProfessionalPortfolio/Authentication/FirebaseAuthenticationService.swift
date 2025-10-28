@@ -166,15 +166,20 @@ final class FirebaseAuthenticationService: AuthenticationService {
     
     private let maxRetryAttempts: Int = 3
     private let retryDelay: TimeInterval = 1.0
+    private weak var authStateManager: AuthenticationStateManager?
+    
+    // MARK: - Initialization
+    
+    init(authStateManager: AuthenticationStateManager? = nil) {
+        self.authStateManager = authStateManager
+    }
     
     // MARK: - AuthenticationService Protocol Implementation
     
     func signIn(email: String, password: String) async throws -> Bool {
         let sanitizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
-        try await performWithRetry { [weak self] in
-            guard let self = self else { throw FirebaseAuthenticationError.internalError }
-            
+        return try await performWithRetry {
             let authResult = try await Auth.auth().signIn(withEmail: sanitizedEmail, password: password)
             
             // Verify the authentication result
@@ -184,16 +189,21 @@ final class FirebaseAuthenticationService: AuthenticationService {
             
             return true
         }
-        
-        return true // Success is implied by no exception thrown
     }
     
     func signUp(email: String, password: String) async throws -> Bool {
         let sanitizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
-        try await performWithRetry { [weak self] in
-            guard let self = self else { throw FirebaseAuthenticationError.internalError }
+        return try await performWithRetry {
+            // Temporarily ignore auth state changes to prevent UI flash
+            self.authStateManager?.setIgnoreAuthChanges(true)
             
+            defer {
+                // Always re-enable auth state changes when done
+                self.authStateManager?.setIgnoreAuthChanges(false)
+            }
+            
+            // Create the account - this will automatically sign in the user
             let authResult = try await Auth.auth().createUser(withEmail: sanitizedEmail, password: password)
             
             // Verify the authentication result
@@ -201,14 +211,16 @@ final class FirebaseAuthenticationService: AuthenticationService {
                 throw FirebaseAuthenticationError.internalError
             }
             
-            // Note: Firebase automatically signs in after account creation, but we want the user
-            // to explicitly sign in, so we sign them out immediately
-            try Auth.auth().signOut()
+            // Perform sign-out on main thread and wait for it to complete
+            try await MainActor.run {
+                try Auth.auth().signOut()
+            }
+            
+            // Add a small delay to ensure everything is processed
+            try await Task.sleep(nanoseconds: 50_000_000) // 50 milliseconds
             
             return true
         }
-        
-        return true // Success is implied by no exception thrown
     }
     
     // MARK: - Advanced Features
@@ -216,7 +228,7 @@ final class FirebaseAuthenticationService: AuthenticationService {
     /// Signs out the current user
     /// - Throws: FirebaseAuthenticationError if sign-out fails
     func signOut() async throws {
-        try await performWithRetry { [weak self] in
+        _ = try await performWithRetry { [weak self] in
             guard self != nil else { throw FirebaseAuthenticationError.internalError }
             
             try Auth.auth().signOut()
@@ -240,13 +252,13 @@ final class FirebaseAuthenticationService: AuthenticationService {
     
     /// Performs an operation with automatic retry logic for transient failures
     private func performWithRetry<T>(_ operation: @escaping () async throws -> T) async throws -> T {
-        var lastError: Error?
-        
         for attempt in 1...maxRetryAttempts {
             do {
                 return try await operation()
             } catch let error as FirebaseAuthenticationError {
-                lastError = error
+                #if DEBUG
+                logError(error, context: "Retry attempt \(attempt)/\(maxRetryAttempts)")
+                #endif
                 
                 // Only retry if the error is retryable and we haven't exceeded max attempts
                 if error.isRetryable && attempt < maxRetryAttempts {
@@ -258,7 +270,10 @@ final class FirebaseAuthenticationService: AuthenticationService {
                 }
             } catch let firebaseError as NSError {
                 let authError = mapFirebaseError(firebaseError)
-                lastError = authError
+                
+                #if DEBUG
+                logError(authError, context: "Firebase error on attempt \(attempt)/\(maxRetryAttempts)")
+                #endif
                 
                 // Only retry if the error is retryable and we haven't exceeded max attempts
                 if authError.isRetryable && attempt < maxRetryAttempts {
@@ -270,13 +285,18 @@ final class FirebaseAuthenticationService: AuthenticationService {
                 }
             } catch {
                 // For any other unexpected errors
-                lastError = error
-                throw FirebaseAuthenticationError.unknown(originalError: error)
+                let unknownError = FirebaseAuthenticationError.unknown(originalError: error)
+                
+                #if DEBUG
+                logError(unknownError, context: "Unexpected error on attempt \(attempt)/\(maxRetryAttempts)")
+                #endif
+                
+                throw unknownError
             }
         }
         
-        // This should never be reached, but just in case
-        throw lastError ?? FirebaseAuthenticationError.internalError
+        // This should never be reached, but defensive programming
+        throw FirebaseAuthenticationError.internalError
     }
     
     /// Maps Firebase Auth errors to comprehensive FirebaseAuthenticationError cases

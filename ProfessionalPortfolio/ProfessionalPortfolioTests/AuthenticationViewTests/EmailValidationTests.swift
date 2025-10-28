@@ -56,35 +56,36 @@ struct EmailValidationTests {
         #expect(viewModel.isEmailValid == false, "Whitespace-only email should be invalid")
     }
     
-    @Test("Email validation clears password when email becomes invalid")
+    @Test("Email change handling preserves passwords for better UX")
     @MainActor
-    func emailValidationClearsPasswordWhenInvalid() async throws {
+    func emailChangePreservesPasswords() async throws {
         // Given
         let viewModel = AuthenticationTestFactory.createViewModel()
         viewModel.email = "user@domain.com"
         viewModel.password = "password123"
+        viewModel.confirmPassword = "password123"
         
         // When - Change to invalid email
         viewModel.email = "invalid"
-        viewModel.validateEmailAndClearPasswordIfNeeded()
+        viewModel.onEmailChanged()
         
-        // Then
-        #expect(viewModel.password.isEmpty, "Password should be cleared when email becomes invalid")
-        #expect(viewModel.confirmPassword.isEmpty, "Confirm password should also be cleared")
+        // Then - Passwords should be preserved for better user experience
+        #expect(!viewModel.password.isEmpty, "Password should be preserved when email becomes invalid")
+        #expect(!viewModel.confirmPassword.isEmpty, "Confirm password should be preserved when email becomes invalid")
     }
     
-    @Test("Email validation clears error messages")
+    @Test("Email change handling clears error messages")
     @MainActor
-    func emailValidationClearsErrorMessages() async throws {
+    func emailChangeHandlingClearsErrorMessages() async throws {
         // Given
         let viewModel = AuthenticationTestFactory.createViewModel()
         viewModel.errorMessage = "Previous error"
         
         // When
-        viewModel.validateEmailAndClearPasswordIfNeeded()
+        viewModel.onEmailChanged()
         
         // Then
-        #expect(viewModel.errorMessage == nil, "Error message should be cleared during validation")
+        #expect(viewModel.errorMessage == nil, "Error message should be cleared when email changes")
     }
 }
     

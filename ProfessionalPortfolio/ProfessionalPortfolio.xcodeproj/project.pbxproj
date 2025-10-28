@@ -69,6 +69,7 @@
 				ErrorView.swift,
 				InfoCard.swift,
 				LinkButton.swift,
+				LinkIcon.swift,
 				LoadingView.swift,
 				ThemedTextField.swift,
 			);

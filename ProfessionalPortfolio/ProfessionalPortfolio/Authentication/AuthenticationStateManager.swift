@@ -38,6 +38,9 @@ public final class AuthenticationStateManager {
     /// Whether the manager is currently checking authentication state (e.g., on app launch)
     var isCheckingAuthState: Bool = true
     
+    /// Flag to temporarily ignore authentication state changes during account creation
+    private var shouldIgnoreAuthChanges: Bool = false
+    
     // MARK: - Private Properties
     
     /// Handle for the Firebase auth state listener
@@ -78,6 +81,11 @@ public final class AuthenticationStateManager {
         setupAuthStateListener()
     }
     
+    /// Temporarily ignore auth state changes (used during account creation)
+    public func setIgnoreAuthChanges(_ ignore: Bool) {
+        shouldIgnoreAuthChanges = ignore
+    }
+    
     // MARK: - Private Methods
     
     /// Sets up the Firebase authentication state listener
@@ -98,6 +106,12 @@ public final class AuthenticationStateManager {
     /// Handles Firebase authentication state changes
     /// - Parameter user: The Firebase user object, or nil if not authenticated
     private func handleAuthStateChange(user: User?) {
+        // Ignore auth state changes if temporarily disabled (during account creation)
+        if shouldIgnoreAuthChanges {
+            print("🔄 Ignoring auth state change during account creation")
+            return
+        }
+        
         // Update authentication state
         isAuthenticated = user != nil
         currentUser = user

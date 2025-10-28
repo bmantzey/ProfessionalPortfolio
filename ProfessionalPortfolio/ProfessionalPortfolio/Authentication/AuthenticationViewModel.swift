@@ -56,15 +56,14 @@ final class AuthenticationViewModel {
     }
     
     @MainActor
-    func validateEmailAndClearPasswordIfNeeded() {
-        if !isEmailValid {
-            password = ""
-            confirmPassword = ""
-        }
+    func onEmailChanged() {
         // Clear any previous error when user starts typing
         if errorMessage != nil {
             errorMessage = nil
         }
+        
+        // Don't automatically clear passwords - let the user decide
+        // This provides a better user experience and prevents the race condition
     }
     
     @MainActor
