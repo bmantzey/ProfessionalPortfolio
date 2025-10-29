@@ -105,6 +105,10 @@ final class AuthenticationViewModel {
     @MainActor
     func toggleMode() {
         isSignUpMode.toggle()
+        if isSignUpMode {
+            email = ""
+        }
+        password = ""
         confirmPassword = ""
         errorMessage = nil
     }

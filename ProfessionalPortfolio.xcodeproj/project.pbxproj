@@ -68,6 +68,7 @@
 				CustomViewModifiers.swift,
 				ErrorView.swift,
 				InfoCard.swift,
+				InlineErrorView.swift,
 				LinkButton.swift,
 				LinkIcon.swift,
 				LoadingView.swift,

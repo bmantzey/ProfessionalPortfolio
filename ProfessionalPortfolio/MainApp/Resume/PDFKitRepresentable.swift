@@ -16,7 +16,7 @@ struct PDFKitRepresentable: UIViewRepresentable {
         pdfView.document = PDFDocument(url: url)
         
         // Configure scaling behavior
-        pdfView.autoScales = false // Don't auto scale to avoid jumping
+        pdfView.autoScales = true // Don't auto scale to avoid jumping
         pdfView.displayMode = .singlePageContinuous
         pdfView.displayDirection = .vertical
         pdfView.maxScaleFactor = 4.0  // Allow zooming up to 4x

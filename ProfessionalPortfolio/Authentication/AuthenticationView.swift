@@ -32,7 +32,7 @@ struct AuthenticationView: View {
             .elevatedCard()
             
             if let errorMessage = viewModel.errorMessage {
-                errorSection(errorMessage)
+                InlineErrorView(message: errorMessage)
             }
             
             Spacer()
@@ -155,23 +155,6 @@ struct AuthenticationView: View {
             .buttonStyle(TextButtonStyle())
         }
         .padding(.top, theme.spacing16) // More space from button above
-    }
-    
-    private func errorSection(_ message: String) -> some View {
-        HStack(spacing: theme.spacing8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(theme.caption)
-                .foregroundColor(theme.accentError)
-            
-            Text(message)
-                .font(theme.caption)
-                .foregroundColor(theme.accentError)
-                .multilineTextAlignment(.leading)
-        }
-        .padding(theme.spacing12)
-        .background(theme.accentError.opacity(0.1))
-        .cornerRadius(theme.cornerRadiusSmall)
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
     
     // MARK: - Computed Properties
