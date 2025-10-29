@@ -15,9 +15,20 @@ enum Tab: CaseIterable {
 
 struct PortfolioTabView: View {
     @State private var selectedTab: Tab = .aboutMe
+    @State private var resumeRefreshTrigger = 0
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: Binding(
+            get: { selectedTab },
+            set: { newTab in
+                if selectedTab == .resume && newTab == .resume {
+                    // Resume tab tapped while already selected - trigger refresh
+                    resumeRefreshTrigger += 1
+                } else {
+                    selectedTab = newTab
+                }
+            }
+        )) {
             AboutMe(selectedTab: $selectedTab)
                 .tabItem {
                     Label("About Me", systemImage: "person.circle")
@@ -31,6 +42,7 @@ struct PortfolioTabView: View {
                 .tag(Tab.guestLog)
             
             Resume()
+                .id(resumeRefreshTrigger) // This will recreate the Resume view when refreshTrigger changes
                 .tabItem {
                     Label("Resume", systemImage: "doc.text")
                 }

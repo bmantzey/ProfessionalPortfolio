@@ -16,13 +16,17 @@ struct PDFKitRepresentable: UIViewRepresentable {
         pdfView.document = PDFDocument(url: url)
         
         // Configure scaling behavior
-        pdfView.autoScales = true
+        pdfView.autoScales = false // Don't auto scale to avoid jumping
         pdfView.displayMode = .singlePageContinuous
         pdfView.displayDirection = .vertical
-        
-        // Set scale factors - minScaleFactor will be the "fit width" scale
-        pdfView.minScaleFactor = pdfView.scaleFactorForSizeToFit
         pdfView.maxScaleFactor = 4.0  // Allow zooming up to 4x
+        pdfView.scaleFactor = 1.0
+        pdfView.minScaleFactor = 0.1
+        let fitWidthScale = pdfView.scaleFactorForSizeToFit
+        if fitWidthScale > 0 {
+            pdfView.minScaleFactor = fitWidthScale
+            pdfView.scaleFactor = fitWidthScale
+        }
         
         return pdfView
     }
@@ -33,8 +37,11 @@ struct PDFKitRepresentable: UIViewRepresentable {
             
             // Set the minimum scale factor to fit width after document is loaded
             DispatchQueue.main.async {
-                pdfView.minScaleFactor = pdfView.scaleFactorForSizeToFit
-                pdfView.scaleFactor = pdfView.scaleFactorForSizeToFit // Start at fit-width
+                let fitWidthScale = pdfView.scaleFactorForSizeToFit
+                if fitWidthScale > 0 {
+                    pdfView.minScaleFactor = fitWidthScale
+                    pdfView.scaleFactor = fitWidthScale
+                }
             }
         }
     }
