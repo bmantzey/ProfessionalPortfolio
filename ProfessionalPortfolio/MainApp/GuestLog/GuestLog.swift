@@ -29,10 +29,11 @@ struct GuestLog: View {
     @State private var companyText = ""
     @State private var messageText = ""
     @State private var isSubmitting = false
+    @State private var mapCameraPosition = MapCameraPosition.automatic
     
     var body: some View {
         VStack {
-            Map {
+            Map(position: $mapCameraPosition) {
                 ForEach(guestLogService.entries) { entry in
                     Annotation("Guest Entry", coordinate: entry.coordinate) {
                         Image(systemName: "mappin.circle.fill")
@@ -59,6 +60,14 @@ struct GuestLog: View {
             .padding()
         }
         .navigationTitle("Guest Log")
+        .onAppear {
+            // Fit all entries when view appears
+            updateMapToFitAllEntries()
+        }
+        .onChange(of: guestLogService.entries.count) { _, _ in
+            // Update map whenever entries count changes (including real-time updates)
+            updateMapToFitAllEntries()
+        }
         .alert("Error", isPresented: .constant(guestLogService.lastError != nil)) {
             Button("OK") {
                 guestLogService.clearError()
@@ -135,6 +144,38 @@ struct GuestLog: View {
     
     // MARK: - Private Methods
     
+    /// Calculates the map region to fit all guest log entries
+    private func updateMapToFitAllEntries() {
+        guard !guestLogService.entries.isEmpty else {
+            mapCameraPosition = .automatic
+            return
+        }
+        
+        let coordinates = guestLogService.entries.map { $0.coordinate }
+        
+        // Calculate the bounding box
+        let minLatitude = coordinates.map { $0.latitude }.min() ?? 0
+        let maxLatitude = coordinates.map { $0.latitude }.max() ?? 0
+        let minLongitude = coordinates.map { $0.longitude }.min() ?? 0
+        let maxLongitude = coordinates.map { $0.longitude }.max() ?? 0
+        
+        // Calculate center and span
+        let centerLatitude = (minLatitude + maxLatitude) / 2
+        let centerLongitude = (minLongitude + maxLongitude) / 2
+        let center = CLLocationCoordinate2D(latitude: centerLatitude, longitude: centerLongitude)
+        
+        // Add padding to the span (20% extra on each side)
+        let latitudeDelta = max((maxLatitude - minLatitude) * 1.4, 0.01) // Minimum span of 0.01
+        let longitudeDelta = max((maxLongitude - minLongitude) * 1.4, 0.01) // Minimum span of 0.01
+        let span = MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+        
+        let region = MKCoordinateRegion(center: center, span: span)
+        
+        withAnimation(.easeInOut(duration: 1.0)) {
+            mapCameraPosition = .region(region)
+        }
+    }
+    
     /// Submits the guest log entry to Firestore (requires authentication)
     @MainActor
     private func submitGuestLogEntry() async {
@@ -169,6 +210,9 @@ struct GuestLog: View {
             companyText = ""
             messageText = ""
             showingSignSheet = false
+            
+            // Update map to show all pins including the new one
+            updateMapToFitAllEntries()
             
             print("✅ Successfully submitted guest log entry")
             
@@ -219,8 +263,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("Got location: \(locations.first?.coordinate)")
-        location = locations.first
+        let firstLoc = locations.first ?? CLLocation(latitude: 0.0, longitude: 0.0)
+        print("Got location: \(firstLoc.coordinate)")
+        location = firstLoc
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
