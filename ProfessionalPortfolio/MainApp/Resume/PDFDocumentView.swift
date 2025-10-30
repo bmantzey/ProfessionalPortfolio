@@ -12,17 +12,22 @@ struct PDFDocumentView: View {
     @State private var isLoading = true
     
     var body: some View {
-        Group {
+        ZStack {
+            PDFKitRepresentable(url: pdfURL)
+                .opacity(isLoading ? 0 : 1)
+            
             if isLoading {
                 ProgressView("Loading PDF...")
-            } else {
-                PDFKitRepresentable(url: pdfURL)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemBackground))
             }
         }
         .onAppear {
-            // Small delay to show loading state briefly
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isLoading = false
+            // Give enough time for PDF to load and scale properly
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isLoading = false
+                }
             }
         }
     }
