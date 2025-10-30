@@ -17,8 +17,8 @@ import FirebaseAuth
  √ 2. Prompt for permission to use the user's location.
  √ 3. Present a text box that prompts them to “Introduce yourself, give feedback, or say anything."
  √ 4. Submit the GPS location and text feedback when submitted.
- 5. Tapping on a pin will show the text feedback that was submitted by the user at that location.
- 6. Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
+ √ 5. Tapping on a pin will show the text feedback that was submitted by the user at that location.
+ 6. LATER: Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
  */
 
 struct GuestLog: View {
@@ -30,42 +30,18 @@ struct GuestLog: View {
     @State private var messageText = ""
     @State private var isSubmitting = false
     @State private var mapCameraPosition = MapCameraPosition.automatic
+    @State private var selectedEntry: GuestLogEntry?
     
     var body: some View {
         VStack {
-            Map(position: $mapCameraPosition) {
-                ForEach(guestLogService.entries) { entry in
-                    Annotation("Guest Entry", coordinate: entry.coordinate) {
-                        Image(systemName: "mappin.circle.fill")
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
-            .frame(height: 400)
-            .overlay(
-                Group {
-                    if guestLogService.isLoading && guestLogService.entries.isEmpty {
-                        ProgressView("Loading guest entries...")
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(8)
-                    }
-                }
-            )
-            
-            Button("Sign My Guest Log") {
-                showingSignSheet = true
-            }
-            .buttonStyle(.borderedProminent)
-            .padding()
+            mapView
+            signButton
         }
         .navigationTitle("Guest Log")
         .onAppear {
-            // Fit all entries when view appears
             updateMapToFitAllEntries()
         }
         .onChange(of: guestLogService.entries.count) { _, _ in
-            // Update map whenever entries count changes (including real-time updates)
             updateMapToFitAllEntries()
         }
         .alert("Error", isPresented: .constant(guestLogService.lastError != nil)) {
@@ -76,70 +52,64 @@ struct GuestLog: View {
             Text(guestLogService.lastError?.localizedDescription ?? "An unknown error occurred")
         }
         .sheet(isPresented: $showingSignSheet) {
-            VStack {
-                Text("Sign Guest Log")
-                    .font(.title)
-                    .padding()
-                
-                if locationManager.authorizationStatus == .notDetermined {
-                    Text("We need your location to add you to the guest log.")
+            SignGuestLogSheetView(
+                nameText: $nameText,
+                companyText: $companyText,
+                messageText: $messageText,
+                isSubmitting: $isSubmitting,
+                locationManager: locationManager,
+                onSubmit: submitGuestLogEntry
+            )
+        }
+    }
+    
+    private var mapView: some View {
+        Map(position: $mapCameraPosition, selection: $selectedEntry) {
+            ForEach(guestLogService.entries) { entry in
+                Marker(entry.name, coordinate: entry.coordinate)
+                    .tint(.blue)
+                    .tag(entry)
+            }
+        }
+        .frame(height: 400)
+        .mapControls {
+            MapUserLocationButton()
+            MapCompass()
+            MapScaleView()
+        }
+        .overlay(
+            Group {
+                if guestLogService.isLoading && guestLogService.entries.isEmpty {
+                    ProgressView("Loading guest entries...")
                         .padding()
-                    
-                    Button("Allow Location Access") {
-                        locationManager.requestLocationPermission()
-                    }
-                    .buttonStyle(.borderedProminent)
-                } else if locationManager.authorizationStatus == .denied {
-                    Text("Location access was denied. Please enable it in Settings.")
-                        .padding()
-                } else if locationManager.location != nil {
-                    VStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Name:")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            TextField("Your name", text: $nameText)
-                                .textFieldStyle(.roundedBorder)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Company/About You:")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            TextField("Company or tell us about yourself", text: $companyText)
-                                .textFieldStyle(.roundedBorder)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Message:")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            TextEditor(text: $messageText)
-                                .frame(height: 120)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.secondary, lineWidth: 1)
-                                )
-                        }
-                        
-                        Button("Sign Guest Log") {
-                            Task {
-                                await submitGuestLogEntry()
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(nameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                                 messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                                 isSubmitting)
-                    }
-                    .padding()
-                } else {
-                    Text("Getting your location...")
-                        .padding()
+                        .background(Color(.systemBackground))
+                        .cornerRadius(8)
                 }
             }
-            .padding()
+        )
+        .sheet(item: $selectedEntry) { entry in
+            NavigationStack {
+                GuestLogDetailView(entry: entry)
+                    .navigationTitle("Guest Entry")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                selectedEntry = nil
+                            }
+                        }
+                    }
+            }
+            .presentationDetents([.medium, .large])
         }
+    }
+    
+    private var signButton: some View {
+        Button("Sign My Guest Log") {
+            showingSignSheet = true
+        }
+        .buttonStyle(.borderedProminent)
+        .padding()
     }
     
     // MARK: - Private Methods
@@ -222,6 +192,194 @@ struct GuestLog: View {
         }
         
         isSubmitting = false
+    }
+}
+
+// MARK: - Helper Views
+
+struct GuestLogDetailView: View {
+    let entry: GuestLogEntry
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Name")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text(entry.name)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+            }
+            
+            if !entry.companyOrAbout.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Company/About")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    Text(entry.companyOrAbout)
+                        .font(.body)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Message")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text(entry.message)
+                    .font(.body)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text(entry.formattedDate)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct GuestLogCalloutView: View {
+    let entry: GuestLogEntry
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(entry.companyOrAbout)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            
+            Text(entry.message)
+                .font(.body)
+            
+            Text(entry.formattedDate)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: 200)
+    }
+}
+
+struct NameField: View {
+    @Binding var nameText: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Name:")
+                .font(.subheadline)
+                .fontWeight(.medium)
+            TextField("Your name", text: $nameText)
+                .textFieldStyle(.roundedBorder)
+        }
+    }
+}
+
+struct CompanyField: View {
+    @Binding var companyText: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Company/About You:")
+                .font(.subheadline)
+                .fontWeight(.medium)
+            TextField("Company or tell us about yourself", text: $companyText)
+                .textFieldStyle(.roundedBorder)
+        }
+    }
+}
+
+struct MessageField: View {
+    @Binding var messageText: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Message:")
+                .font(.subheadline)
+                .fontWeight(.medium)
+            TextEditor(text: $messageText)
+                .frame(height: 120)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.secondary, lineWidth: 1)
+                )
+        }
+    }
+}
+
+struct GuestLogFormFields: View {
+    @Binding var nameText: String
+    @Binding var companyText: String
+    @Binding var messageText: String
+    @Binding var isSubmitting: Bool
+    let onSubmit: () async -> Void
+    
+    private var isFormValid: Bool {
+        !nameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            NameField(nameText: $nameText)
+            CompanyField(companyText: $companyText)
+            MessageField(messageText: $messageText)
+            
+            Button("Sign Guest Log") {
+                Task {
+                    await onSubmit()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(!isFormValid || isSubmitting)
+        }
+        .padding()
+    }
+}
+
+struct SignGuestLogSheetView: View {
+    @Binding var nameText: String
+    @Binding var companyText: String
+    @Binding var messageText: String
+    @Binding var isSubmitting: Bool
+    let locationManager: LocationManager
+    let onSubmit: () async -> Void
+    
+    var body: some View {
+        VStack {
+            Text("Sign Guest Log")
+                .font(.title)
+                .padding()
+            
+            if locationManager.authorizationStatus == .notDetermined {
+                Text("We need your location to add you to the guest log.")
+                    .padding()
+                
+                Button("Allow Location Access") {
+                    locationManager.requestLocationPermission()
+                }
+                .buttonStyle(.borderedProminent)
+            } else if locationManager.authorizationStatus == .denied {
+                Text("Location access was denied. Please enable it in Settings.")
+                    .padding()
+            } else if locationManager.location != nil {
+                GuestLogFormFields(
+                    nameText: $nameText,
+                    companyText: $companyText,
+                    messageText: $messageText,
+                    isSubmitting: $isSubmitting,
+                    onSubmit: onSubmit
+                )
+            } else {
+                Text("Getting your location...")
+                    .padding()
+            }
+        }
+        .padding()
     }
 }
 

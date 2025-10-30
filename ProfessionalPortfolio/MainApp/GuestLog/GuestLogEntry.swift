@@ -11,7 +11,7 @@ import FirebaseFirestore
 
 /// A guest log entry model that works with Firestore
 /// This represents a single entry in our guest log with location and user details
-struct GuestLogEntry: Codable, Identifiable {
+struct GuestLogEntry: Codable, Identifiable, Hashable {
     let id: String
     let userId: String  // Firebase Auth user ID
     let name: String
@@ -39,6 +39,23 @@ struct GuestLogEntry: Codable, Identifiable {
     
     var location: CLLocation {
         CLLocation(latitude: latitude, longitude: longitude)
+    }
+    
+    // Formatted date for display in callouts
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: timestamp)
+    }
+    
+    // MARK: - Hashable Conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: GuestLogEntry, rhs: GuestLogEntry) -> Bool {
+        return lhs.id == rhs.id
     }
 }
 
