@@ -71,15 +71,15 @@ struct DefaultTheme: AppTheme {
     let primaryMedium = Color(red: 0.13, green: 0.24, blue: 0.42)    // #213D6B
     let primaryLight = Color(red: 0.24, green: 0.38, blue: 0.58)     // #3D6194
     
-    // Background Colors - Light Gray spectrum
-    let backgroundPrimary = Color(red: 0.97, green: 0.97, blue: 0.98) // #F7F7FA
-    let backgroundSecondary = Color(red: 0.93, green: 0.94, blue: 0.95) // #EEEFF2
-    let backgroundTertiary = Color.white
+    // Background Colors - Adaptive to light/dark mode
+    let backgroundPrimary = Color(.systemBackground)
+    let backgroundSecondary = Color(.secondarySystemBackground)
+    let backgroundTertiary = Color(.tertiarySystemBackground)
     
-    // Text Colors
-    let textPrimary = Color(red: 0.09, green: 0.09, blue: 0.11)      // #171719
-    let textSecondary = Color(red: 0.38, green: 0.40, blue: 0.45)    // #616673
-    let textTertiary = Color(red: 0.62, green: 0.64, blue: 0.68)     // #9EA3AD
+    // Text Colors - Adaptive to light/dark mode
+    let textPrimary = Color(.label)
+    let textSecondary = Color(.secondaryLabel)
+    let textTertiary = Color(.tertiaryLabel)
     let textOnPrimary = Color.white
     
     // Accent Colors
@@ -118,8 +118,8 @@ struct DefaultTheme: AppTheme {
     let borderWidthThin: CGFloat = 1
     let borderWidthMedium: CGFloat = 2
     
-    // Shadows
-    let shadowColor = Color.black.opacity(0.08)
+    // Shadows - Adaptive to light/dark mode
+    let shadowColor = Color(.systemGray4).opacity(0.3)
     let shadowRadius: CGFloat = 8
 }
 

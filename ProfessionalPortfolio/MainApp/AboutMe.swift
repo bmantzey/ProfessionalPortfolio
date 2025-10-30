@@ -30,6 +30,7 @@ struct AboutMe: View {
                     VStack(spacing: 24) {
                         Text("Welcome to Brandon Mantzey's Portfolio!")
                             .font(.headline)
+                            .foregroundColor(theme.textPrimary)
                             .padding(.top, 20)
 
                         Text("Welcome to my portfolio app. This is a great way to showcase my skills and abilities as an iOS developer and practice my studies of SwiftUI.\n\nI invite you to check out my Github page. There you'll find the source code for this project, where you can see for yourself my work.\n\nPlease visit the Guest Log tab and feel free to email me your comments or suggestions.")
@@ -78,6 +79,7 @@ struct AboutMe: View {
                                         .animation(.easeInOut(duration: 0.1), value: isSigningOut)
                                 }
                                 .buttonStyle(SocialLinkButtonStyle())
+                                
                                 Link(destination: URL(string: "https://www.linkedin.com/in/bmantzey")!) {
                                     Image("linkedin_icon")
                                         .resizable()
@@ -133,6 +135,7 @@ struct AboutMe: View {
                 .padding(.bottom, 20)
             }
             .navigationTitle("Brandon's Portfolio")
+            .background(theme.backgroundPrimary)
         }
     }
     
