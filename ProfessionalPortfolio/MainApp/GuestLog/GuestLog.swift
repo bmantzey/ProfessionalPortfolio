@@ -67,7 +67,7 @@ struct GuestLog: View {
         Map(position: $mapCameraPosition, selection: $selectedEntry) {
             ForEach(guestLogService.entries) { entry in
                 Marker(entry.name, coordinate: entry.coordinate)
-                    .tint(.blue)
+                    .tint(isCurrentUserEntry(entry) ? .red : .blue)
                     .tag(entry)
             }
         }
@@ -113,6 +113,12 @@ struct GuestLog: View {
     }
     
     // MARK: - Private Methods
+    
+    /// Checks if the given entry was made by the currently logged-in user
+    private func isCurrentUserEntry(_ entry: GuestLogEntry) -> Bool {
+        guard let currentUser = Auth.auth().currentUser else { return false }
+        return entry.userId == currentUser.uid
+    }
     
     /// Calculates the map region to fit all guest log entries
     private func updateMapToFitAllEntries() {
