@@ -7,33 +7,33 @@
 
 import SwiftUI
 import MapKit
-import SwiftData
 import CoreLocation
+import FirebaseAuth
 
 // TODO: Figure out the best implementation of a map view.
 /*
  Want to have a "Sign My Guest Log" link in a space somewhere on the screen that will:
- 1. Display the pins for all users that have signed the guest log.
- 2. Prompt for permission to use the user's location.
- 3. Present a text box that prompts them to “Introduce yourself, give feedback, or say anything."
- 4. Submit the GPS location and text feedback when submitted.
+ √ 1. Display the pins for all users that have signed the guest log.
+ √ 2. Prompt for permission to use the user's location.
+ √ 3. Present a text box that prompts them to “Introduce yourself, give feedback, or say anything."
+ √ 4. Submit the GPS location and text feedback when submitted.
  5. Tapping on a pin will show the text feedback that was submitted by the user at that location.
  6. Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
  */
 
 struct GuestLog: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var entries: [GuestLogEntry]
+    @State private var guestLogService = GuestLogFirestoreService()
     @State private var showingSignSheet = false
     @State private var locationManager = LocationManager()
     @State private var nameText = ""
     @State private var companyText = ""
     @State private var messageText = ""
+    @State private var isSubmitting = false
     
     var body: some View {
         VStack {
             Map {
-                ForEach(entries, id: \.id) { entry in
+                ForEach(guestLogService.entries) { entry in
                     Annotation("Guest Entry", coordinate: entry.coordinate) {
                         Image(systemName: "mappin.circle.fill")
                             .foregroundColor(.blue)
@@ -41,6 +41,16 @@ struct GuestLog: View {
                 }
             }
             .frame(height: 400)
+            .overlay(
+                Group {
+                    if guestLogService.isLoading && guestLogService.entries.isEmpty {
+                        ProgressView("Loading guest entries...")
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(8)
+                    }
+                }
+            )
             
             Button("Sign My Guest Log") {
                 showingSignSheet = true
@@ -49,6 +59,13 @@ struct GuestLog: View {
             .padding()
         }
         .navigationTitle("Guest Log")
+        .alert("Error", isPresented: .constant(guestLogService.lastError != nil)) {
+            Button("OK") {
+                guestLogService.clearError()
+            }
+        } message: {
+            Text(guestLogService.lastError?.localizedDescription ?? "An unknown error occurred")
+        }
         .sheet(isPresented: $showingSignSheet) {
             VStack {
                 Text("Sign Guest Log")
@@ -97,26 +114,14 @@ struct GuestLog: View {
                         }
                         
                         Button("Sign Guest Log") {
-                            if let location = locationManager.location {
-                                let entry = GuestLogEntry(
-                                    name: nameText,
-                                    companyOrAbout: companyText,
-                                    message: messageText,
-                                    latitude: location.coordinate.latitude,
-                                    longitude: location.coordinate.longitude
-                                )
-                                modelContext.insert(entry)
-                                
-                                // Clear the form and close the sheet
-                                nameText = ""
-                                companyText = ""
-                                messageText = ""
-                                showingSignSheet = false
+                            Task {
+                                await submitGuestLogEntry()
                             }
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(nameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-                                 messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                 messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                 isSubmitting)
                     }
                     .padding()
                 } else {
@@ -126,6 +131,53 @@ struct GuestLog: View {
             }
             .padding()
         }
+    }
+    
+    // MARK: - Private Methods
+    
+    /// Submits the guest log entry to Firestore (requires authentication)
+    @MainActor
+    private func submitGuestLogEntry() async {
+        guard let location = locationManager.location else {
+            print("❌ No location available for guest log entry")
+            return
+        }
+        
+        // Check if user is authenticated
+        guard let currentUser = Auth.auth().currentUser else {
+            guestLogService.setError(GuestLogError.notAuthenticated)
+            print("❌ User not authenticated for guest log entry")
+            return
+        }
+        
+        isSubmitting = true
+        
+        do {
+            let entry = GuestLogEntry(
+                userId: currentUser.uid,
+                name: nameText.trimmingCharacters(in: .whitespacesAndNewlines),
+                companyOrAbout: companyText.trimmingCharacters(in: .whitespacesAndNewlines),
+                message: messageText.trimmingCharacters(in: .whitespacesAndNewlines),
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude
+            )
+            
+            try await guestLogService.addEntry(entry)
+            
+            // Clear the form and close the sheet on success
+            nameText = ""
+            companyText = ""
+            messageText = ""
+            showingSignSheet = false
+            
+            print("✅ Successfully submitted guest log entry")
+            
+        } catch {
+            print("❌ Failed to submit guest log entry: \(error)")
+            // Error will be shown via the alert in the UI
+        }
+        
+        isSubmitting = false
     }
 }
 

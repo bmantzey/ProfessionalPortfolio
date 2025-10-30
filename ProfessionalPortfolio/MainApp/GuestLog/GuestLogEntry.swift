@@ -6,21 +6,24 @@
 //
 
 import Foundation
-import SwiftData
 import CoreLocation
+import FirebaseFirestore
 
-@Model
-final class GuestLogEntry {
-    var id: UUID
-    var name: String
-    var companyOrAbout: String
-    var message: String
-    var latitude: Double
-    var longitude: Double
-    var timestamp: Date
+/// A guest log entry model that works with Firestore
+/// This represents a single entry in our guest log with location and user details
+struct GuestLogEntry: Codable, Identifiable {
+    let id: String
+    let userId: String  // Firebase Auth user ID
+    let name: String
+    let companyOrAbout: String
+    let message: String
+    let latitude: Double
+    let longitude: Double
+    let timestamp: Date
     
-    init(name: String, companyOrAbout: String, message: String, latitude: Double, longitude: Double) {
-        self.id = UUID()
+    init(userId: String, name: String, companyOrAbout: String, message: String, latitude: Double, longitude: Double) {
+        self.id = UUID().uuidString
+        self.userId = userId
         self.name = name
         self.companyOrAbout = companyOrAbout
         self.message = message
@@ -29,11 +32,67 @@ final class GuestLogEntry {
         self.timestamp = Date()
     }
     
+    // Computed properties for CoreLocation integration
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
     
     var location: CLLocation {
         CLLocation(latitude: latitude, longitude: longitude)
+    }
+}
+
+// MARK: - Firestore Extensions
+
+extension GuestLogEntry {
+    /// Initialize from Firestore document data
+    init?(from data: [String: Any], documentId: String) {
+        guard 
+            let userId = data["userId"] as? String,
+            let name = data["name"] as? String,
+            let companyOrAbout = data["companyOrAbout"] as? String,
+            let message = data["message"] as? String,
+            let latitude = data["latitude"] as? Double,
+            let longitude = data["longitude"] as? Double
+        else {
+            print("❌ Failed to parse guest log entry: missing required fields")
+            print("Available data keys: \(data.keys)")
+            return nil
+        }
+        
+        // Handle Firestore timestamp - it could be a Timestamp or Date
+        let timestamp: Date
+        if let firestoreTimestamp = data["timestamp"] as? Timestamp {
+            timestamp = firestoreTimestamp.dateValue()
+        } else if let dateTimestamp = data["timestamp"] as? Date {
+            timestamp = dateTimestamp
+        } else {
+            print("❌ Failed to parse timestamp from: \(data["timestamp"] ?? "nil")")
+            return nil
+        }
+        
+        self.id = documentId
+        self.userId = userId
+        self.name = name
+        self.companyOrAbout = companyOrAbout
+        self.message = message
+        self.latitude = latitude
+        self.longitude = longitude
+        self.timestamp = timestamp
+        
+        print("✅ Successfully parsed guest log entry: \(name) at (\(latitude), \(longitude))")
+    }
+    
+    /// Convert to Firestore document data
+    func toFirestoreData() -> [String: Any] {
+        return [
+            "userId": userId,
+            "name": name,
+            "companyOrAbout": companyOrAbout,
+            "message": message,
+            "latitude": latitude,
+            "longitude": longitude,
+            "timestamp": Timestamp(date: timestamp)  // Use Firestore Timestamp
+        ]
     }
 }
