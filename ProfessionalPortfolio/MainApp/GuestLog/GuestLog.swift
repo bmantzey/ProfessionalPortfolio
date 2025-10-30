@@ -10,15 +10,8 @@ import MapKit
 import CoreLocation
 import FirebaseAuth
 
-// TODO: Figure out the best implementation of a map view.
 /*
- Want to have a "Sign My Guest Log" link in a space somewhere on the screen that will:
- √ 1. Display the pins for all users that have signed the guest log.
- √ 2. Prompt for permission to use the user's location.
- √ 3. Present a text box that prompts them to “Introduce yourself, give feedback, or say anything."
- √ 4. Submit the GPS location and text feedback when submitted.
- √ 5. Tapping on a pin will show the text feedback that was submitted by the user at that location.
- 6. LATER: Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
+TODO: LATER: Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
  */
 
 struct GuestLog: View {
@@ -31,18 +24,30 @@ struct GuestLog: View {
     @State private var isSubmitting = false
     @State private var mapCameraPosition = MapCameraPosition.automatic
     @State private var selectedEntry: GuestLogEntry?
+    @State private var isShowingUserEntry = false
+    @State private var isMapAnimating = false
+    
+    /// Computed property to check if current user has already signed
+    private var hasCurrentUserSigned: Bool {
+        guard let currentUser = Auth.auth().currentUser else { return false }
+        return guestLogService.entries.contains { $0.userId == currentUser.uid }
+    }
     
     var body: some View {
-        VStack {
+        ZStack(alignment: .bottom) {
             mapView
             signButton
         }
         .navigationTitle("Guest Log")
         .onAppear {
-            updateMapToFitAllEntries()
+            withAnimation(.easeInOut(duration: 1.0)) {
+                updateMapToFitAllEntries()
+            }
         }
         .onChange(of: guestLogService.entries.count) { _, _ in
-            updateMapToFitAllEntries()
+            withAnimation(.easeInOut(duration: 1.0)) {
+                updateMapToFitAllEntries()
+            }
         }
         .alert("Error", isPresented: .constant(guestLogService.lastError != nil)) {
             Button("OK") {
@@ -71,7 +76,7 @@ struct GuestLog: View {
                     .tag(entry)
             }
         }
-        .frame(height: 400)
+        .ignoresSafeArea(edges: .bottom) // Allow map to extend under safe area
         .mapControls {
             MapUserLocationButton()
             MapCompass()
@@ -105,11 +110,40 @@ struct GuestLog: View {
     }
     
     private var signButton: some View {
-        Button("Sign My Guest Log") {
-            showingSignSheet = true
+        Button(buttonText) {
+            if hasCurrentUserSigned {
+                if isShowingUserEntry {
+                    showAllEntries()
+                } else {
+                    zoomToCurrentUserEntry()
+                }
+            } else {
+                showingSignSheet = true
+            }
         }
-        .buttonStyle(.borderedProminent)
-        .padding()
+        .font(.headline)
+        .foregroundColor(.white)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.blue.gradient)
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+        )
+        .disabled(isMapAnimating)
+        .opacity(isMapAnimating ? 0.6 : 1.0)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+    }
+    
+    private var buttonText: String {
+        if !hasCurrentUserSigned {
+            return "Sign My Guest Log"
+        } else if isShowingUserEntry {
+            return "Show All Entries"
+        } else {
+            return "Go To My Entry"
+        }
     }
     
     // MARK: - Private Methods
@@ -118,6 +152,48 @@ struct GuestLog: View {
     private func isCurrentUserEntry(_ entry: GuestLogEntry) -> Bool {
         guard let currentUser = Auth.auth().currentUser else { return false }
         return entry.userId == currentUser.uid
+    }
+    
+    /// Zooms the map to the current user's guest log entry within a ~15-mile radius
+    private func zoomToCurrentUserEntry() {
+        guard let currentUser = Auth.auth().currentUser,
+              let userEntry = guestLogService.entries.first(where: { $0.userId == currentUser.uid }) else {
+            print("❌ Could not find current user's entry")
+            return
+        }
+        
+        isMapAnimating = true
+        
+        // Create a region with approximately 15-mile radius
+        // 1 degree latitude ≈ 69 miles, so 15 miles ≈ 0.217 degrees
+        // Longitude varies by latitude, but we'll use the same approximation
+        let span = MKCoordinateSpan(latitudeDelta: 0.217, longitudeDelta: 0.217)
+        let region = MKCoordinateRegion(center: userEntry.coordinate, span: span)
+        
+        withAnimation(.easeInOut(duration: 1.0)) {
+            mapCameraPosition = .region(region)
+        }
+        
+        // Set state after animation completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isShowingUserEntry = true
+            isMapAnimating = false
+        }
+    }
+    
+    /// Shows all entries on the map
+    private func showAllEntries() {
+        isMapAnimating = true
+        
+        withAnimation(.easeInOut(duration: 1.0)) {
+            updateMapToFitAllEntries()
+        }
+        
+        // Set state after animation completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isShowingUserEntry = false
+            isMapAnimating = false
+        }
     }
     
     /// Calculates the map region to fit all guest log entries
@@ -147,9 +223,7 @@ struct GuestLog: View {
         
         let region = MKCoordinateRegion(center: center, span: span)
         
-        withAnimation(.easeInOut(duration: 1.0)) {
-            mapCameraPosition = .region(region)
-        }
+        mapCameraPosition = .region(region)
     }
     
     /// Submits the guest log entry to Firestore (requires authentication)
@@ -164,6 +238,13 @@ struct GuestLog: View {
         guard let currentUser = Auth.auth().currentUser else {
             guestLogService.setError(GuestLogError.notAuthenticated)
             print("❌ User not authenticated for guest log entry")
+            return
+        }
+        
+        // Check if user has already signed (double-check)
+        if hasCurrentUserSigned {
+            print("❌ User has already signed the guest log")
+            showingSignSheet = false
             return
         }
         
@@ -188,7 +269,9 @@ struct GuestLog: View {
             showingSignSheet = false
             
             // Update map to show all pins including the new one
-            updateMapToFitAllEntries()
+            withAnimation(.easeInOut(duration: 1.0)) {
+                updateMapToFitAllEntries()
+            }
             
             print("✅ Successfully submitted guest log entry")
             
