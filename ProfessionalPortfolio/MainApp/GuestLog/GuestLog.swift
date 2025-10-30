@@ -94,16 +94,15 @@ struct GuestLog: View {
         )
         .sheet(item: $selectedEntry) { entry in
             NavigationStack {
-                GuestLogDetailView(entry: entry)
-                    .navigationTitle("Guest Entry")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Done") {
-                                selectedEntry = nil
-                            }
-                        }
+                GuestLogDetailView(
+                    entry: entry,
+                    guestLogService: guestLogService,
+                    onDismiss: {
+                        selectedEntry = nil
                     }
+                )
+                .navigationTitle("Guest Entry")
+                .navigationBarTitleDisplayMode(.inline)
             }
             .presentationDetents([.medium, .large])
         }
@@ -288,24 +287,100 @@ struct GuestLog: View {
 
 struct GuestLogDetailView: View {
     let entry: GuestLogEntry
+    let guestLogService: GuestLogFirestoreService
+    let onDismiss: () -> Void
+    
+    @State private var isEditing = false
+    @State private var editedName = ""
+    @State private var editedCompany = ""
+    @State private var editedMessage = ""
+    @State private var isSubmittingEdit = false
+    
+    /// Check if this entry belongs to the current user
+    private var isCurrentUserEntry: Bool {
+        guard let currentUser = FirebaseAuth.Auth.auth().currentUser else { return false }
+        return entry.userId == currentUser.uid
+    }
+    
+    /// Get the current version of this entry from the service
+    private var currentEntry: GuestLogEntry {
+        return guestLogService.entries.first { $0.id == entry.id } ?? entry
+    }
     
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if isEditing {
+                editingView
+            } else {
+                readOnlyView
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .onAppear {
+            // Initialize edit fields with current values
+            editedName = currentEntry.name
+            editedCompany = currentEntry.companyOrAbout
+            editedMessage = currentEntry.message
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if isCurrentUserEntry && !isEditing {
+                    Button {
+                        isEditing = true
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(isEditing ? "Save" : "Done") {
+                    if isEditing {
+                        Task {
+                            await saveEdits()
+                        }
+                    } else {
+                        onDismiss()
+                    }
+                }
+                .disabled(isSubmittingEdit)
+            }
+            
+            if isEditing {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        // Reset to original values
+                        editedName = currentEntry.name
+                        editedCompany = currentEntry.companyOrAbout
+                        editedMessage = currentEntry.message
+                        isEditing = false
+                    }
+                    .foregroundColor(.red)
+                }
+            }
+        }
+    }
+    
+    private var readOnlyView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Name")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text(entry.name)
+                Text(currentEntry.name)
                     .font(.title2)
                     .fontWeight(.semibold)
             }
             
-            if !entry.companyOrAbout.isEmpty {
+            if !currentEntry.companyOrAbout.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Company/About")
                         .font(.headline)
                         .foregroundColor(.secondary)
-                    Text(entry.companyOrAbout)
+                    Text(currentEntry.companyOrAbout)
                         .font(.body)
                 }
             }
@@ -314,7 +389,7 @@ struct GuestLogDetailView: View {
                 Text("Message")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text(entry.message)
+                Text(currentEntry.message)
                     .font(.body)
             }
             
@@ -322,15 +397,84 @@ struct GuestLogDetailView: View {
                 Text("Date")
                     .font(.headline)
                     .foregroundColor(.secondary)
-                Text(entry.formattedDate)
+                Text(currentEntry.formattedDate)
                     .font(.body)
                     .foregroundColor(.secondary)
             }
-            
-            Spacer()
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var editingView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Name")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                TextField("Your name", text: $editedName)
+                    .textFieldStyle(.roundedBorder)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Company/About")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                TextField("Company or tell us about yourself", text: $editedCompany)
+                    .textFieldStyle(.roundedBorder)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Message")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                TextEditor(text: $editedMessage)
+                    .frame(height: 120)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.secondary, lineWidth: 1)
+                    )
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Date")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text(currentEntry.formattedDate)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    private var isFormValid: Bool {
+        !editedName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !editedMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    @MainActor
+    private func saveEdits() async {
+        guard isFormValid else { return }
+        
+        isSubmittingEdit = true
+        
+        do {
+            // Create updated entry with current timestamp
+            var updatedEntry = currentEntry
+            updatedEntry.name = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedEntry.companyOrAbout = editedCompany.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedEntry.message = editedMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+            updatedEntry.timestamp = Date() // Update to current date/time
+            
+            try await guestLogService.updateEntry(updatedEntry)
+            
+            isEditing = false
+            print("✅ Successfully updated guest log entry")
+            
+        } catch {
+            print("❌ Failed to update guest log entry: \(error)")
+            // Error will be shown via the alert in the main view
+        }
+        
+        isSubmittingEdit = false
     }
 }
 

@@ -71,6 +71,38 @@ class GuestLogFirestoreService {
         }
     }
     
+    /// Update an existing guest log entry in Firestore (requires authentication)
+    /// - Parameter entry: The guest log entry to update
+    /// - Throws: Error if the operation fails or user is not authenticated
+    func updateEntry(_ entry: GuestLogEntry) async throws {
+        // Check if user is authenticated
+        guard let currentUser = Auth.auth().currentUser else {
+            throw GuestLogError.notAuthenticated
+        }
+        
+        // Verify the entry's userId matches the current user
+        guard entry.userId == currentUser.uid else {
+            throw GuestLogError.unauthorizedAccess
+        }
+        
+        // Ensure we have a document ID to update
+        guard let documentId = entry.documentId else {
+            throw GuestLogError.invalidData
+        }
+        
+        do {
+            let data = entry.toFirestoreData()
+            try await db.collection(collectionName).document(documentId).updateData(data)
+            print("✅ Successfully updated guest log entry for: \(entry.name) by user: \(currentUser.uid)")
+        } catch {
+            print("❌ Failed to update guest log entry: \(error)")
+            await MainActor.run {
+                self.lastError = error
+            }
+            throw error
+        }
+    }
+    
     /// Manually fetch all entries (useful for pull-to-refresh)
     func fetchEntries() async {
         await MainActor.run {
@@ -162,6 +194,7 @@ class GuestLogFirestoreService {
 /// Specific errors for guest log operations
 enum GuestLogError: LocalizedError {
     case addFailed(underlying: Error)
+    case updateFailed(underlying: Error)
     case fetchFailed(underlying: Error)
     case invalidData
     case notAuthenticated
@@ -171,6 +204,8 @@ enum GuestLogError: LocalizedError {
         switch self {
         case .addFailed:
             return "Failed to save your guest log entry"
+        case .updateFailed:
+            return "Failed to update your guest log entry"
         case .fetchFailed:
             return "Failed to load guest log entries"
         case .invalidData:
@@ -184,7 +219,7 @@ enum GuestLogError: LocalizedError {
     
     var recoverySuggestion: String? {
         switch self {
-        case .addFailed, .fetchFailed:
+        case .addFailed, .updateFailed, .fetchFailed:
             return "Please check your internet connection and try again"
         case .invalidData:
             return "Please verify your information and try again"

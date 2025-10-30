@@ -14,12 +14,13 @@ import FirebaseFirestore
 struct GuestLogEntry: Codable, Identifiable, Hashable {
     let id: String
     let userId: String  // Firebase Auth user ID
-    let name: String
-    let companyOrAbout: String
-    let message: String
+    var name: String
+    var companyOrAbout: String
+    var message: String
     let latitude: Double
     let longitude: Double
-    let timestamp: Date
+    var timestamp: Date
+    let documentId: String? // Firestore document ID for updates
     
     init(userId: String, name: String, companyOrAbout: String, message: String, latitude: Double, longitude: Double) {
         self.id = UUID().uuidString
@@ -30,6 +31,7 @@ struct GuestLogEntry: Codable, Identifiable, Hashable {
         self.latitude = latitude
         self.longitude = longitude
         self.timestamp = Date()
+        self.documentId = nil
     }
     
     // Computed properties for CoreLocation integration
@@ -44,8 +46,7 @@ struct GuestLogEntry: Codable, Identifiable, Hashable {
     // Formatted date for display in callouts
     var formattedDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
+        formatter.dateFormat = "MMM d, yyyy @ h:mm a zzz"
         return formatter.string(from: timestamp)
     }
     
@@ -96,6 +97,7 @@ extension GuestLogEntry {
         self.latitude = latitude
         self.longitude = longitude
         self.timestamp = timestamp
+        self.documentId = documentId
         
         print("✅ Successfully parsed guest log entry: \(name) at (\(latitude), \(longitude))")
     }
