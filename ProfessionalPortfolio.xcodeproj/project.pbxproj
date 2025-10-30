@@ -83,6 +83,13 @@
 			);
 			target = C4CE8A672EA6E43D00C8A3DF /* ProfessionalPortfolioUITests */;
 		};
+		C4ADC0E92EB2D28700D731E1 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolio" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C4CE8A4E2EA6E43B00C8A3DF /* ProfessionalPortfolio */;
+		};
 		C4CBDA9A2EAADF310067E5B3 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolioTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -105,6 +112,7 @@
 		C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				C4ADC0E92EB2D28700D731E1 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolio" target */,
 				C4CBDA9A2EAADF310067E5B3 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolioTests" target */,
 				C476C84F2EA9755600C69AE1 /* Exceptions for "ProfessionalPortfolio" folder in "ProfessionalPortfolioUITests" target */,
 			);
@@ -509,6 +517,9 @@
 				DEVELOPMENT_TEAM = D77H469HEK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProfessionalPortfolio/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -541,6 +552,9 @@
 				DEVELOPMENT_TEAM = D77H469HEK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProfessionalPortfolio/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
