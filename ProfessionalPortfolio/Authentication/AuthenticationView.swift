@@ -20,24 +20,27 @@ struct AuthenticationView: View {
     }
     
     var body: some View {
-        VStack(spacing: theme.spacing32) {
-            headerSection
-            
-            VStack(spacing: theme.spacing24) {
-                formFields
-                signInButton
-                accountToggleSection
+        ScrollView {
+            VStack(spacing: theme.spacing32) {
+                headerSection
+                
+                VStack(spacing: theme.spacing24) {
+                    formFields
+                    signInButton
+                    accountToggleSection
+                }
+                .padding(theme.spacing24) // Internal padding INSIDE the card
+                .elevatedCard()
+                
+                if let errorMessage = viewModel.errorMessage {
+                    InlineErrorView(message: errorMessage)
+                }
+                
+                Spacer()
             }
-            .padding(theme.spacing24) // Internal padding INSIDE the card
-            .elevatedCard()
-            
-            if let errorMessage = viewModel.errorMessage {
-                InlineErrorView(message: errorMessage)
-            }
-            
-            Spacer()
+            .padding(theme.spacing24) // Reduced from 32 to match card padding
         }
-        .padding(theme.spacing24) // Reduced from 32 to match card padding
+        .scrollBounceBehavior(.basedOnSize)
         .background(
             LinearGradient(
                 gradient: Gradient(colors: [
@@ -81,6 +84,9 @@ struct AuthenticationView: View {
             .onChange(of: viewModel.email) {
                 viewModel.onEmailChanged()
             }
+            .onSubmit {
+                handleFormSubmission()
+            }
             
             ThemedTextField(
                 title: "Password",
@@ -90,6 +96,9 @@ struct AuthenticationView: View {
                 errorMessage: passwordErrorMessage
             )
             .animation(.easeInOut(duration: 0.2), value: viewModel.isEmailValid)
+            .onSubmit {
+                handleFormSubmission()
+            }
             
             if viewModel.isSignUpMode {
                 ThemedTextField(
@@ -100,6 +109,9 @@ struct AuthenticationView: View {
                     errorMessage: confirmPasswordErrorMessage
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
+                .onSubmit {
+                    handleFormSubmission()
+                }
             }
         }
     }
@@ -180,6 +192,21 @@ struct AuthenticationView: View {
         guard !viewModel.confirmPassword.isEmpty else { return nil }
         guard viewModel.password != viewModel.confirmPassword else { return nil }
         return "Passwords don't match"
+    }
+    
+    // MARK: - Actions
+    
+    private func handleFormSubmission() {
+        // Only submit if the form is valid and button would be enabled
+        guard buttonEnabled else { return }
+        
+        Task {
+            if viewModel.isSignUpMode {
+                await viewModel.signUp()
+            } else {
+                await viewModel.signIn()
+            }
+        }
     }
 }
 
