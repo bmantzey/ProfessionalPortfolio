@@ -14,6 +14,12 @@ import FirebaseAuth
 TODO: LATER: Have an AI summary of all user feedback displayed near where the button to sign the guest book is.
  */
 
+enum MapStyleType {
+    case standard
+    case hybrid
+    case imagery
+}
+
 struct GuestLog: View {
     @State private var guestLogService = GuestLogFirestoreService()
     @State private var showingSignSheet = false
@@ -25,6 +31,9 @@ struct GuestLog: View {
     @State private var selectedEntry: GuestLogEntry?
     @State private var isShowingUserEntry = false
     @State private var isMapAnimating = false
+    @State private var mapStyle: MapStyle = .standard()
+    @State private var selectedMapStyleType: MapStyleType = .standard
+    @State private var isShowingMapStylePicker = false
     
     // Use shared location manager that persists
     private let locationManager = LocationManager.shared
@@ -78,11 +87,15 @@ struct GuestLog: View {
                     .tag(entry)
             }
         }
+        .mapStyle(mapStyle)
         .ignoresSafeArea(edges: .bottom) // Allow map to extend under safe area
         .mapControls {
             MapUserLocationButton()
             MapCompass()
             MapScaleView()
+        }
+        .overlay(alignment: .topTrailing) {
+            mapStyleToggleButton
         }
         .overlay(
             Group {
@@ -145,6 +158,43 @@ struct GuestLog: View {
         } else {
             return "Go To My Entry"
         }
+    }
+    
+    private var mapStyleToggleButton: some View {
+        Menu {
+            Button(action: { 
+                mapStyle = .standard()
+                selectedMapStyleType = .standard
+            }) {
+                Label("Standard", systemImage: selectedMapStyleType == .standard ? "checkmark" : "")
+            }
+            
+            Button(action: { 
+                mapStyle = .hybrid()
+                selectedMapStyleType = .hybrid
+            }) {
+                Label("Hybrid", systemImage: selectedMapStyleType == .hybrid ? "checkmark" : "")
+            }
+            
+            Button(action: { 
+                mapStyle = .imagery()
+                selectedMapStyleType = .imagery
+            }) {
+                Label("Satellite", systemImage: selectedMapStyleType == .imagery ? "checkmark" : "")
+            }
+        } label: {
+            Image(systemName: "map")
+                .font(.title2)
+                .foregroundColor(.primary)
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(.regularMaterial)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                )
+        }
+        .padding(.top, 60) // Account for safe area and navigation
+        .padding(.trailing, 16)
     }
     
     // MARK: - Private Methods

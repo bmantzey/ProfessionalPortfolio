@@ -42,7 +42,7 @@ struct AuthenticationView: View {
             LinearGradient(
                 gradient: Gradient(colors: [
                     theme.backgroundTertiary,
-                    theme.backgroundPrimary
+                    Color(.systemGray)
                 ]),
                 startPoint: .top,
                 endPoint: .bottom
@@ -59,7 +59,7 @@ struct AuthenticationView: View {
         VStack(spacing: theme.spacing8) {
             Text(viewModel.isSignUpMode ? "Create Account" : "Welcome")
                 .font(theme.largeTitle)
-                .foregroundColor(theme.primaryDark)
+                .foregroundColor(theme.primaryLight)
             
             Text(viewModel.isSignUpMode ? "Sign up to get started" : "Please sign in to continue")
                 .font(theme.subheadline)

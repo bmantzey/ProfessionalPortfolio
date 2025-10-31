@@ -85,7 +85,7 @@ struct TextButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(theme.callout)
-            .foregroundColor(theme.primaryMedium)
+            .foregroundColor(theme.primaryLight)
             .opacity(configuration.isPressed ? 0.6 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
