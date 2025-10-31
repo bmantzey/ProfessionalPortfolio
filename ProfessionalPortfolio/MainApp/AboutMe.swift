@@ -135,7 +135,16 @@ struct AboutMe: View {
                 .padding(.bottom, 20)
             }
             .navigationTitle("Brandon's Portfolio")
-            .background(theme.backgroundPrimary)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        theme.backgroundTertiary,
+                        Color(.systemGray)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
         }
     }
     

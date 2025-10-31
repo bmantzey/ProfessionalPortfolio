@@ -15,10 +15,21 @@ import SwiftUI
 import PDFKit
 
 struct Resume: View {
+    @Environment(\.theme) var theme
     private let resumeURL = URL(string: "https://bmantzey-portfolio.web.app/documents/resume.pdf")!
     
     var body: some View {
         PDFDocumentView(pdfURL: resumeURL)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        theme.backgroundTertiary,
+                        Color(.systemGray)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
     }
 }
 
