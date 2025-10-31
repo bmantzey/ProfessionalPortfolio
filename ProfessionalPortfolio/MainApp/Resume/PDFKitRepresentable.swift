@@ -13,28 +13,17 @@ struct PDFKitRepresentable: UIViewRepresentable {
     
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()
-        
-        // Configure basic display settings
         pdfView.displayMode = .singlePageContinuous
         pdfView.displayDirection = .vertical
-        pdfView.autoScales = false // We'll handle scaling manually
-        pdfView.maxScaleFactor = 4.0
-        pdfView.minScaleFactor = 0.25 // This will be updated dynamically
+        pdfView.autoScales = false
+        pdfView.document = PDFDocument(url: url)
         
-        // Set up coordinator to handle document loading and rotation
-        context.coordinator.setupPDFView(pdfView, with: url)
-        
+        context.coordinator.setup(pdfView: pdfView)
         return pdfView
     }
     
     func updateUIView(_ pdfView: PDFView, context: Context) {
-        // Only reload if URL changed
-        if pdfView.document?.documentURL != url {
-            context.coordinator.setupPDFView(pdfView, with: url)
-        } else {
-            // Check if view size changed (rotation) and adjust if needed
-            context.coordinator.handleViewSizeChange(pdfView)
-        }
+        // Do nothing - handle everything through orientation notifications
     }
     
     func makeCoordinator() -> Coordinator {
@@ -42,125 +31,45 @@ struct PDFKitRepresentable: UIViewRepresentable {
     }
     
     class Coordinator: NSObject {
-        private var pdfView: PDFView?
-        private var hasSetInitialScale = false
-        private var lastViewSize: CGSize = .zero
+        private weak var pdfView: PDFView?
         
-        func setupPDFView(_ pdfView: PDFView, with url: URL) {
+        func setup(pdfView: PDFView) {
             self.pdfView = pdfView
-            self.hasSetInitialScale = false
-            self.lastViewSize = .zero
             
-            // Add observer for when document loads
-            NotificationCenter.default.removeObserver(self)
+            // Listen for orientation changes
             NotificationCenter.default.addObserver(
                 self,
-                selector: #selector(documentDidLoad),
-                name: .PDFViewDocumentChanged,
-                object: pdfView
-            )
-            
-            // Add observer for device rotation
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(orientationDidChange),
+                selector: #selector(orientationChanged),
                 name: UIDevice.orientationDidChangeNotification,
                 object: nil
             )
             
-            // Load the document
-            DispatchQueue.global(qos: .userInitiated).async {
-                if let document = PDFDocument(url: url) {
-                    DispatchQueue.main.async {
-                        pdfView.document = document
-                    }
-                }
+            // Initial setup
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.fitToWidth()
             }
         }
         
-        @objc private func documentDidLoad(_ notification: Notification) {
-            guard let pdfView = notification.object as? PDFView,
+        @objc private func orientationChanged() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.fitToWidth()
+            }
+        }
+        
+        private func fitToWidth() {
+            guard let pdfView = pdfView,
                   let document = pdfView.document,
-                  document.pageCount > 0,
-                  !hasSetInitialScale else { return }
+                  let page = document.page(at: 0),
+                  pdfView.bounds.width > 0 else { return }
             
-            // Wait a bit for view to be fully laid out
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-                self?.setFitToWidthScale(pdfView)
-            }
-        }
-        
-        @objc private func orientationDidChange() {
-            guard let pdfView = self.pdfView else { return }
+            let scale = pdfView.bounds.width / page.bounds(for: .mediaBox).width
             
-            // Handle rotation more quickly to catch the size change
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.handleViewSizeChange(pdfView)
-            }
-        }
-        
-        func handleViewSizeChange(_ pdfView: PDFView) {
-            let currentSize = pdfView.bounds.size
+            pdfView.minScaleFactor = scale
+            pdfView.maxScaleFactor = scale * 4
+            pdfView.scaleFactor = scale
+            pdfView.go(to: page)
             
-            // Check if the view size has actually changed (indicating rotation or resize)
-            if currentSize != lastViewSize && currentSize.width > 0 && currentSize.height > 0 {
-                lastViewSize = currentSize
-                
-                // Scroll to top immediately, but give a tiny delay to ensure view is ready
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    if let document = pdfView.document, let firstPage = document.page(at: 0) {
-                        pdfView.go(to: firstPage)
-                    }
-                }
-                
-                // Recalculate and set the fit-to-width scale
-                setFitToWidthScale(pdfView, animated: true)
-            }
-        }
-        
-        private func setFitToWidthScale(_ pdfView: PDFView, animated: Bool = false) {
-            guard pdfView.bounds.width > 0,
-                  pdfView.bounds.height > 0,
-                  let document = pdfView.document,
-                  let firstPage = document.page(at: 0) else {
-                
-                // If not ready yet, try again after a short delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                    self?.setFitToWidthScale(pdfView, animated: animated)
-                }
-                return
-            }
-            
-            let pageRect = firstPage.bounds(for: .mediaBox)
-            let pdfViewSize = pdfView.bounds.size
-            
-            // Calculate scale to fit width exactly (this becomes our minimum)
-            let scaleToFitWidth = pdfViewSize.width / pageRect.width
-            
-            // Add small padding to ensure content doesn't touch edges
-            let fitWidthScale = scaleToFitWidth * 0.95
-            
-            // Update scale factors
-            let newMinScale = fitWidthScale
-            let newMaxScale = fitWidthScale * 4.0
-            
-            pdfView.minScaleFactor = newMinScale
-            pdfView.maxScaleFactor = newMaxScale
-            
-            // For initial load or significant changes, set to fit width
-            // For rotations, animate to fit width
-            if animated {
-                UIView.animate(withDuration: 0.3, animations: {
-                    pdfView.scaleFactor = fitWidthScale
-                })
-            } else {
-                pdfView.scaleFactor = fitWidthScale
-            }
-            
-            hasSetInitialScale = true
-            lastViewSize = pdfViewSize
-            
-            print("✅ PDF scaled to fit width: \(fitWidthScale) (view: \(pdfViewSize), page: \(pageRect.size))")
+            print("✅ PDF scaled: \(scale), bounds: \(pdfView.bounds.size)")
         }
         
         deinit {
