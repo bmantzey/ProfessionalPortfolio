@@ -90,9 +90,8 @@ struct GuestLog: View {
         .mapStyle(mapStyle)
         .ignoresSafeArea(edges: .bottom) // Allow map to extend under safe area
         .mapControls {
-            MapUserLocationButton()
-            MapCompass()
             MapScaleView()
+            MapCompass()
         }
         .overlay(alignment: .topTrailing) {
             mapStyleToggleButton
