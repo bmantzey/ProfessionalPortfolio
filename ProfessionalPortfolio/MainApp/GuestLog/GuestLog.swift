@@ -17,7 +17,6 @@ TODO: LATER: Have an AI summary of all user feedback displayed near where the bu
 struct GuestLog: View {
     @State private var guestLogService = GuestLogFirestoreService()
     @State private var showingSignSheet = false
-    @State private var locationManager = LocationManager()
     @State private var nameText = ""
     @State private var companyText = ""
     @State private var messageText = ""
@@ -26,6 +25,9 @@ struct GuestLog: View {
     @State private var selectedEntry: GuestLogEntry?
     @State private var isShowingUserEntry = false
     @State private var isMapAnimating = false
+    
+    // Use shared location manager that persists
+    private let locationManager = LocationManager.shared
     
     /// Computed property to check if current user has already signed
     private var hasCurrentUserSigned: Bool {
@@ -582,37 +584,126 @@ struct SignGuestLogSheetView: View {
     let locationManager: LocationManager
     let onSubmit: () async -> Void
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
-        VStack {
-            Text("Sign Guest Log")
-                .font(.title)
-                .padding()
-            
-            if locationManager.authorizationStatus == .notDetermined {
-                Text("We need your location to add you to the guest log.")
-                    .padding()
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Sign Guest Log")
+                    .font(.title2)
+                    .fontWeight(.semibold)
                 
-                Button("Allow Location Access") {
-                    locationManager.requestLocationPermission()
+                if locationManager.authorizationStatus == .notDetermined {
+                    VStack(spacing: 16) {
+                        Image(systemName: "location.circle")
+                            .font(.system(size: 64))
+                            .foregroundColor(.blue)
+                        
+                        Text("Location Required")
+                            .font(.headline)
+                        
+                        Text("We need your location to add you to the guest log. This will only be requested once.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.secondary)
+                        
+                        Button("Allow Location Access") {
+                            locationManager.requestLocationForSigning()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                    }
+                    .padding()
+                    
+                } else if locationManager.authorizationStatus == .denied {
+                    VStack(spacing: 16) {
+                        Image(systemName: "location.slash")
+                            .font(.system(size: 64))
+                            .foregroundColor(.red)
+                        
+                        Text("Location Access Denied")
+                            .font(.headline)
+                        
+                        Text("Please enable location access in Settings to sign the guest log.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.secondary)
+                        
+                        Button("Open Settings") {
+                            if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(settingsUrl)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding()
+                    
+                } else if locationManager.isRequestingLocation {
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .controlSize(.large)
+                        
+                        Text("Getting your location...")
+                            .font(.headline)
+                        
+                        Text("This may take a moment")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    
+                } else if let error = locationManager.locationError {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 64))
+                            .foregroundColor(.orange)
+                        
+                        Text("Location Error")
+                            .font(.headline)
+                        
+                        Text(error.localizedDescription)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.secondary)
+                        
+                        Button("Try Again") {
+                            locationManager.requestLocationForSigning()
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding()
+                    
+                } else if locationManager.location != nil {
+                    // Show the form once we have location
+                    ScrollView {
+                        GuestLogFormFields(
+                            nameText: $nameText,
+                            companyText: $companyText,
+                            messageText: $messageText,
+                            isSubmitting: $isSubmitting,
+                            onSubmit: onSubmit
+                        )
+                    }
+                } else {
+                    // This shouldn't happen, but just in case
+                    VStack(spacing: 16) {
+                        Text("Ready to sign")
+                            .font(.headline)
+                        
+                        Button("Get Location") {
+                            locationManager.requestLocationForSigning()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding()
                 }
-                .buttonStyle(.borderedProminent)
-            } else if locationManager.authorizationStatus == .denied {
-                Text("Location access was denied. Please enable it in Settings.")
-                    .padding()
-            } else if locationManager.location != nil {
-                GuestLogFormFields(
-                    nameText: $nameText,
-                    companyText: $companyText,
-                    messageText: $messageText,
-                    isSubmitting: $isSubmitting,
-                    onSubmit: onSubmit
-                )
-            } else {
-                Text("Getting your location...")
-                    .padding()
+            }
+            .padding()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
             }
         }
-        .padding()
     }
 }
 
@@ -622,19 +713,19 @@ struct SignGuestLogSheetView: View {
 
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
+    static let shared = LocationManager()
+    
     private let manager = CLLocationManager()
     var location: CLLocation?
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    var locationError: Error?
+    var isRequestingLocation = false
     
     override init() {
         super.init()
         manager.delegate = self
         authorizationStatus = manager.authorizationStatus
-        
-        // Request permission once when the LocationManager is created
-        if authorizationStatus == .notDetermined {
-            requestLocationPermission()
-        }
+        // DON'T request permission here - only when explicitly needed
     }
     
     func requestLocationPermission() {
@@ -643,13 +734,46 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         manager.requestWhenInUseAuthorization()
     }
     
+    /// Request location once - only call this when actually signing the guest log
+    func requestLocationForSigning() {
+        guard !isRequestingLocation else {
+            print("Already requesting location...")
+            return
+        }
+        
+        locationError = nil
+        isRequestingLocation = true
+        
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            print("Requesting location permission for signing...")
+            manager.requestWhenInUseAuthorization()
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("Permission already granted, requesting location...")
+            manager.requestLocation()
+        case .denied, .restricted:
+            print("Location permission denied/restricted")
+            locationError = LocationError.permissionDenied
+            isRequestingLocation = false
+        @unknown default:
+            print("Unknown authorization status")
+            locationError = LocationError.unknown
+            isRequestingLocation = false
+        }
+    }
+    
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         print("Authorization changed to: \(manager.authorizationStatus)")
         authorizationStatus = manager.authorizationStatus
         
-        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
-            print("Requesting location...")
+        // Only request location if we're currently in the signing flow
+        if isRequestingLocation && (authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways) {
+            print("Permission granted during signing flow, requesting location...")
             manager.requestLocation()
+        } else if isRequestingLocation && (authorizationStatus == .denied || authorizationStatus == .restricted) {
+            print("Permission denied during signing flow")
+            locationError = LocationError.permissionDenied
+            isRequestingLocation = false
         }
     }
     
@@ -657,9 +781,27 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let firstLoc = locations.first ?? CLLocation(latitude: 0.0, longitude: 0.0)
         print("Got location: \(firstLoc.coordinate)")
         location = firstLoc
+        isRequestingLocation = false
+        locationError = nil
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location error: \(error)")
+        locationError = error
+        isRequestingLocation = false
+    }
+}
+
+enum LocationError: Error, LocalizedError {
+    case permissionDenied
+    case unknown
+    
+    var errorDescription: String? {
+        switch self {
+        case .permissionDenied:
+            return "Location permission was denied. Please enable it in Settings to sign the guest log."
+        case .unknown:
+            return "An unknown location error occurred."
+        }
     }
 }
