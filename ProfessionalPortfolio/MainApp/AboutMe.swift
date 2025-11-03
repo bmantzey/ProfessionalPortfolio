@@ -113,6 +113,7 @@ struct AboutMe: View {
                 }
                 .disabled(isSigningOut)
                 .padding(.top, theme.spacing8)
+                .padding(.bottom, theme.spacing16)
             }
             .navigationTitle("Brandon Mantzey!")
             .background(
