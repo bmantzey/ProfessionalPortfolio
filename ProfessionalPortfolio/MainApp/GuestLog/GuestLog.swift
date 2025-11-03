@@ -93,8 +93,10 @@ struct GuestLog: View {
             MapScaleView()
             MapCompass()
         }
-        .overlay(alignment: .topTrailing) {
+        .overlay(alignment: .topLeading) {
             mapStyleToggleButton
+                .padding(.top, 8)
+                .padding(.leading, 16)
         }
         .overlay(
             Group {
@@ -192,8 +194,6 @@ struct GuestLog: View {
                         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 )
         }
-        .padding(.top, 60) // Account for safe area and navigation
-        .padding(.trailing, 16)
     }
     
     // MARK: - Private Methods
@@ -346,6 +346,8 @@ struct GuestLogDetailView: View {
     @State private var editedCompany = ""
     @State private var editedMessage = ""
     @State private var isSubmittingEdit = false
+    @State private var showingDeleteConfirmation = false
+    @State private var isDeleting = false
     
     /// Check if this entry belongs to the current user
     private var isCurrentUserEntry: Bool {
@@ -378,11 +380,31 @@ struct GuestLogDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if isCurrentUserEntry && !isEditing {
-                    Button {
-                        isEditing = true
-                    } label: {
-                        Image(systemName: "square.and.pencil")
+                if isCurrentUserEntry {
+                    if isEditing {
+                        Button("Cancel") {
+                            // Reset to original values
+                            editedName = currentEntry.name
+                            editedCompany = currentEntry.companyOrAbout
+                            editedMessage = currentEntry.message
+                            isEditing = false
+                        }
+                    } else {
+                        HStack(spacing: 16) {
+                            Button {
+                                isEditing = true
+                            } label: {
+                                Image(systemName: "square.and.pencil")
+                            }
+                            .disabled(isDeleting)
+                            
+                            Button {
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .disabled(isDeleting)
+                        }
                     }
                 }
             }
@@ -397,21 +419,22 @@ struct GuestLogDetailView: View {
                         onDismiss()
                     }
                 }
-                .disabled(isSubmittingEdit)
+                .disabled(isSubmittingEdit || isDeleting)
             }
-            
-            if isEditing {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        // Reset to original values
-                        editedName = currentEntry.name
-                        editedCompany = currentEntry.companyOrAbout
-                        editedMessage = currentEntry.message
-                        isEditing = false
-                    }
-                    .foregroundColor(.red)
+        }
+        .confirmationDialog(
+            "Delete Entry",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                Task {
+                    await deleteEntry()
                 }
             }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete your guest log entry? This action cannot be undone.")
         }
     }
     
@@ -526,6 +549,22 @@ struct GuestLogDetailView: View {
         }
         
         isSubmittingEdit = false
+    }
+    
+    @MainActor
+    private func deleteEntry() async {
+        isDeleting = true
+        
+        do {
+            try await guestLogService.deleteEntry(currentEntry)
+            print("✅ Successfully deleted guest log entry")
+            onDismiss()
+        } catch {
+            print("❌ Failed to delete guest log entry: \(error)")
+            // Error will be shown via the alert in the main view
+        }
+        
+        isDeleting = false
     }
 }
 

@@ -103,6 +103,50 @@ class GuestLogFirestoreService {
         }
     }
     
+    /// Delete an existing guest log entry from Firestore (requires authentication)
+    /// - Parameter entry: The guest log entry to delete
+    /// - Throws: Error if the operation fails or user is not authenticated
+    func deleteEntry(_ entry: GuestLogEntry) async throws {
+        // Check if user is authenticated
+        guard let currentUser = Auth.auth().currentUser else {
+            throw GuestLogError.notAuthenticated
+        }
+        
+        // Verify the entry's userId matches the current user
+        guard entry.userId == currentUser.uid else {
+            throw GuestLogError.unauthorizedAccess
+        }
+        
+        // Get the document ID (either from documentId or use the entry's id)
+        let documentId = entry.documentId ?? entry.id
+        
+        guard !documentId.isEmpty else {
+            throw GuestLogError.invalidData
+        }
+        
+        do {
+            // Delete from Firestore
+            try await db.collection(collectionName).document(documentId).delete()
+            
+            // Remove from local entries array on main actor
+            await MainActor.run {
+                if let index = self.entries.firstIndex(where: { $0.id == entry.id }) {
+                    self.entries.remove(at: index)
+                    print("✅ Removed entry from local array: \(entry.name)")
+                }
+            }
+            
+            print("✅ Successfully deleted guest log entry from Firestore: \(entry.name)")
+            
+        } catch {
+            print("❌ Failed to delete guest log entry: \(error)")
+            await MainActor.run {
+                self.lastError = error
+            }
+            throw error
+        }
+    }
+    
     /// Manually fetch all entries (useful for pull-to-refresh)
     func fetchEntries() async {
         await MainActor.run {
@@ -196,6 +240,7 @@ enum GuestLogError: LocalizedError {
     case addFailed(underlying: Error)
     case updateFailed(underlying: Error)
     case fetchFailed(underlying: Error)
+    case deleteFailed(underlying: Error)
     case invalidData
     case notAuthenticated
     case unauthorizedAccess
@@ -208,6 +253,8 @@ enum GuestLogError: LocalizedError {
             return "Failed to update your guest log entry"
         case .fetchFailed:
             return "Failed to load guest log entries"
+        case .deleteFailed:
+            return "Failed to delete guest log entry"
         case .invalidData:
             return "Invalid guest log data"
         case .notAuthenticated:
@@ -219,7 +266,7 @@ enum GuestLogError: LocalizedError {
     
     var recoverySuggestion: String? {
         switch self {
-        case .addFailed, .updateFailed, .fetchFailed:
+        case .addFailed, .updateFailed, .fetchFailed, .deleteFailed:
             return "Please check your internet connection and try again"
         case .invalidData:
             return "Please verify your information and try again"
