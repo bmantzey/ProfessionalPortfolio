@@ -15,6 +15,7 @@ struct ThemedTextField: View {
     @Binding var text: String
     var isSecure: Bool = false
     var keyboardType: UIKeyboardType = .default
+    var submitLabel: SubmitLabel = .return
     var autocapitalization: TextInputAutocapitalization = .sentences
     var errorMessage: String? = nil
     
@@ -30,11 +31,13 @@ struct ThemedTextField: View {
                 if isSecure {
                     SecureField(placeholder, text: $text)
                         .focused($isFocused)
+                        .submitLabel(submitLabel)
                 } else {
                     TextField(placeholder, text: $text)
                         .focused($isFocused)
                         .keyboardType(keyboardType)
                         .textInputAutocapitalization(autocapitalization)
+                        .submitLabel(submitLabel)
                 }
             }
             .font(theme.body)

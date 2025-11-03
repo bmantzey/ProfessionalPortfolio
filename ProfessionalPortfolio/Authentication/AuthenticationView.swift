@@ -10,6 +10,7 @@ import SwiftUI
 struct AuthenticationView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel: AuthenticationViewModel
+    @FocusState private var focusedField: Field?
     
     init(authService: AuthenticationService) {
         _viewModel = State(initialValue: AuthenticationViewModel(auth: authService))
@@ -17,6 +18,10 @@ struct AuthenticationView: View {
     
     init(viewModel: AuthenticationViewModel) {
         _viewModel = State(initialValue: viewModel)
+    }
+    
+    enum Field: Hashable {
+        case email, password, confirmPassword
     }
     
     var body: some View {
@@ -78,14 +83,19 @@ struct AuthenticationView: View {
                 placeholder: "Enter your email",
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
+                submitLabel: .next,
                 autocapitalization: .never,
                 errorMessage: emailErrorMessage
             )
+            .focused($focusedField, equals: .email)
             .onChange(of: viewModel.email) {
                 viewModel.onEmailChanged()
             }
             .onSubmit {
-                handleFormSubmission()
+                // Only move to password field if email is valid
+                if viewModel.isEmailValid {
+                    focusedField = .password
+                }
             }
             
             ThemedTextField(
@@ -93,11 +103,24 @@ struct AuthenticationView: View {
                 placeholder: viewModel.isEmailValid ? "Enter your password" : "Complete email first",
                 text: $viewModel.password,
                 isSecure: true,
+                submitLabel: viewModel.isSignUpMode ? .next : .return,
                 errorMessage: passwordErrorMessage
             )
+            .focused($focusedField, equals: .password)
+            .disabled(!viewModel.isEmailValid) // Disable if email is not valid
             .animation(.easeInOut(duration: 0.2), value: viewModel.isEmailValid)
             .onSubmit {
-                handleFormSubmission()
+                if viewModel.isSignUpMode {
+                    // In sign-up mode: only move to confirm password if password is valid
+                    if viewModel.passwordValidationMessage == nil && !viewModel.password.isEmpty {
+                        focusedField = .confirmPassword
+                    }
+                } else {
+                    // In sign-in mode: submit if both email and password are valid
+                    if viewModel.canSignIn {
+                        handleFormSubmission()
+                    }
+                }
             }
             
             if viewModel.isSignUpMode {
@@ -108,9 +131,14 @@ struct AuthenticationView: View {
                     isSecure: true,
                     errorMessage: confirmPasswordErrorMessage
                 )
+                .focused($focusedField, equals: .confirmPassword)
+                .disabled(viewModel.passwordValidationMessage != nil || viewModel.password.isEmpty) // Disable if password is not valid
                 .transition(.opacity.combined(with: .move(edge: .top)))
                 .onSubmit {
-                    handleFormSubmission()
+                    // Only submit if passwords match and form is valid
+                    if viewModel.password == viewModel.confirmPassword && viewModel.canSignUp {
+                        handleFormSubmission()
+                    }
                 }
             }
         }
