@@ -7,16 +7,6 @@
 
 import SwiftUI
 
-// TODO: Wipe this temporary code and implement the following instead:
-/*
- 1. Show a professional photo of me.
- 2. Put together a summary of who I am, what I do, and what I've been looking for.
- 3. Provide a link to my LinkedIn.
- 4. Provide a link to my GitHub.
- 5. Consider other content that might make sense.
- 6. Content will be static for now, but can be provided via Firestore Database later.
- */
-
 struct AboutMe: View {
     @Environment(\.theme) var theme
     @Environment(\.authStateManager) private var authStateManager
@@ -27,40 +17,7 @@ struct AboutMe: View {
         NavigationStack {
             VStack(spacing: 0) {
                 ScrollView {
-                    VStack(spacing: 24) {
-                        Text("Welcome to Brandon Mantzey's Portfolio!")
-                            .font(.headline)
-                            .foregroundColor(theme.textPrimary)
-                            .padding(.top, 20)
-
-                        Text("Welcome to my portfolio app. This is a great way to showcase my skills and abilities as an iOS developer and practice my studies of SwiftUI.\n\nI invite you to check out my Github page. There you'll find the source code for this project, where you can see for yourself my work.\n\nPlease visit the Guest Log tab and feel free to email me your comments or suggestions.")
-                            .font(theme.body)
-                            .foregroundColor(theme.textSecondary)
-                            .lineSpacing(4)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(theme.spacing16)
-                            .card()
-                
-                        
-                        Button(action: {
-                            selectedTab = .guestLog
-                        }) {
-                            HStack(spacing: theme.spacing12) {
-                                Spacer()
-                                
-                                Text("Please sign my guest book.")
-                                    .font(theme.body)
-                                    .foregroundColor(theme.accentInfo)
-                                
-                                Image(systemName: "arrow.up.right")
-                                    .font(theme.subheadline)
-                                    .foregroundColor(theme.accentInfo)
-                            }
-                            .padding(theme.spacing16)
-                            .card()
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        
+                    VStack(spacing: theme.spacing16) {
                         HStack(spacing: 20) {
                             Image("me_striped_shirt")
                                 .resizable()
@@ -91,8 +48,32 @@ struct AboutMe: View {
                                 .buttonStyle(SocialLinkButtonStyle())
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
+                        
+                        Button(action: {
+                            selectedTab = .guestLog
+                        }) {
+                            HStack(spacing: theme.spacing12) {
+                                Spacer()
+                                
+                                Text("Please sign my guest book.")
+                                    .font(theme.body)
+                                    .foregroundColor(theme.accentInfo)
+                                
+                                Image(systemName: "arrow.up.right")
+                                    .font(theme.subheadline)
+                                    .foregroundColor(theme.accentInfo)
+                            }
+                            .padding(theme.spacing16)
+                            .card()
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        Text("I'm Brandon, a Senior Mobile Software Engineer who's been building iOS apps since the early App Store days. For over 16 years, I've specialized in Swift and Objective-C, working on production applications for companies like Garmin, TD Ameritrade/Schwab, Perficient, and GE. I love tackling complex problems with clean architecture and delivering features that make a real impact. From launching the Garmin Dive app to building the system that migrated 13.5 million TD Ameritrade customers to Schwab Mobile, I've led and contributed to successful projects across multiple industries.\n\nI’ve spent the past several months sharpening my skills with SwiftUI through intensive study and leveraging AI as a force multiplier in my development process. What used to take weeks now takes days, and I built this portfolio to demonstrate that synergy in action and showcase the result of that growth.\n\nI’m excited to connect with fellow developers and potential collaborators in the software development world. Feel free to explore, sign my Guest Log, check out my GitHub for the source code, and drop me a note via Email. I'd love to hear from you.")
+                            .font(theme.body)
+                            .foregroundColor(theme.textSecondary)
+                            .lineSpacing(4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(theme.spacing16)
+                            .card()
                     }
                     LinkButton(
                         icon: "mail",
@@ -116,8 +97,7 @@ struct AboutMe: View {
                                 .font(.system(size: 14, weight: .regular))
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(theme.spacing12)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(.systemGray6))
@@ -132,9 +112,9 @@ struct AboutMe: View {
                     .animation(.easeInOut(duration: 0.15), value: isSigningOut)
                 }
                 .disabled(isSigningOut)
-                .padding(.bottom, 20)
+                .padding(.top, theme.spacing8)
             }
-            .navigationTitle("Brandon's Portfolio")
+            .navigationTitle("Brandon Mantzey!")
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
