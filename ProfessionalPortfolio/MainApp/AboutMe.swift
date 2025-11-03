@@ -48,6 +48,7 @@ struct AboutMe: View {
                                 .buttonStyle(SocialLinkButtonStyle())
                             }
                         }
+                        .padding(.top, theme.spacing8)
                         
                         Button(action: {
                             selectedTab = .guestLog
