@@ -82,7 +82,7 @@ struct GuestLog: View {
     private var mapView: some View {
         Map(position: $mapCameraPosition, selection: $selectedEntry) {
             ForEach(guestLogService.entries) { entry in
-                Marker(entry.name, coordinate: entry.coordinate)
+                Marker(entry.name.isEmpty ? "" : entry.name, coordinate: entry.coordinate)
                     .tint(isCurrentUserEntry(entry) ? .red : .blue)
                     .tag(entry)
             }
@@ -641,11 +641,6 @@ struct GuestLogFormFields: View {
     @Binding var isSubmitting: Bool
     let onSubmit: () async -> Void
     
-    private var isFormValid: Bool {
-        !nameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
     var body: some View {
         VStack(spacing: 16) {
             NameField(nameText: $nameText)
@@ -658,7 +653,7 @@ struct GuestLogFormFields: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .disabled(!isFormValid || isSubmitting)
+            .disabled(isSubmitting)
         }
         .padding()
     }
