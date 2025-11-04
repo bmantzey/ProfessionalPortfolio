@@ -37,11 +37,13 @@ struct AuthenticationView: View {
                 .padding(theme.spacing24) // Internal padding INSIDE the card
                 .elevatedCard()
                 
+                // Error message with additional spacing and better positioning
                 if let errorMessage = viewModel.errorMessage {
                     InlineErrorView(message: errorMessage)
+                        .padding(.top, theme.spacing16) // Extra space from card above
                 }
                 
-                Spacer()
+                Spacer(minLength: theme.spacing32) // Minimum space to push error above keyboard
             }
             .padding(theme.spacing24) // Reduced from 32 to match card padding
         }
@@ -146,6 +148,9 @@ struct AuthenticationView: View {
     
     private var signInButton: some View {
         Button {
+            // Dismiss keyboard when button is pressed
+            focusedField = nil
+            
             Task {
                 if viewModel.isSignUpMode {
                     await viewModel.signUp()
@@ -227,6 +232,9 @@ struct AuthenticationView: View {
     private func handleFormSubmission() {
         // Only submit if the form is valid and button would be enabled
         guard buttonEnabled else { return }
+        
+        // Dismiss keyboard
+        focusedField = nil
         
         Task {
             if viewModel.isSignUpMode {

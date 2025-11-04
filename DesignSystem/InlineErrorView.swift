@@ -24,11 +24,11 @@ struct InlineErrorView: View {
         HStack(spacing: iconSpacing) {
             Image(systemName: icon)
                 .font(iconFont)
-                .foregroundColor(theme.accentError)
+                .foregroundColor(errorTextColor)
             
             Text(message)
                 .font(textFont)
-                .foregroundColor(theme.accentError)
+                .foregroundColor(errorTextColor)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
             
@@ -37,6 +37,11 @@ struct InlineErrorView: View {
         .padding(contentPadding)
         .background(backgroundColor)
         .cornerRadius(cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(borderColor, lineWidth: borderWidth)
+        )
+        .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowOffset)
         .transition(.opacity.combined(with: .move(edge: .top)))
     }
     
@@ -52,7 +57,7 @@ struct InlineErrorView: View {
     
     private var iconFont: Font {
         switch style {
-        case .standard: return theme.caption
+        case .standard: return theme.callout // Bigger icon to match text
         case .compact: return theme.caption.weight(.medium)
         case .subtle: return theme.caption
         }
@@ -60,15 +65,15 @@ struct InlineErrorView: View {
     
     private var textFont: Font {
         switch style {
-        case .standard: return theme.caption
-        case .compact: return theme.caption
+        case .standard: return theme.callout.weight(.semibold) // Bigger and bolder
+        case .compact: return theme.caption.weight(.medium)
         case .subtle: return theme.caption.weight(.medium)
         }
     }
     
     private var contentPadding: EdgeInsets {
         switch style {
-        case .standard: return EdgeInsets(top: theme.spacing12, leading: theme.spacing12, bottom: theme.spacing12, trailing: theme.spacing12)
+        case .standard: return EdgeInsets(top: theme.spacing16, leading: theme.spacing16, bottom: theme.spacing16, trailing: theme.spacing16) // More padding for better visibility
         case .compact: return EdgeInsets(top: theme.spacing8, leading: theme.spacing8, bottom: theme.spacing8, trailing: theme.spacing8)
         case .subtle: return EdgeInsets(top: theme.spacing4, leading: 0, bottom: theme.spacing4, trailing: 0)
         }
@@ -76,8 +81,8 @@ struct InlineErrorView: View {
     
     private var backgroundColor: Color {
         switch style {
-        case .standard: return theme.accentError.opacity(0.1)
-        case .compact: return theme.accentError.opacity(0.08)
+        case .standard: return Color.white.opacity(0.95) // White background for better contrast
+        case .compact: return Color.white.opacity(0.9)
         case .subtle: return Color.clear
         }
     }
@@ -86,6 +91,54 @@ struct InlineErrorView: View {
         switch style {
         case .standard: return theme.cornerRadiusSmall
         case .compact: return theme.cornerRadiusSmall * 0.5
+        case .subtle: return 0
+        }
+    }
+    
+    private var errorTextColor: Color {
+        switch style {
+        case .standard: return Color.red.opacity(0.9) // Darker red for better contrast on white
+        case .compact: return theme.accentError
+        case .subtle: return theme.accentError
+        }
+    }
+    
+    private var borderColor: Color {
+        switch style {
+        case .standard: return Color.red.opacity(0.3) // Subtle red border
+        case .compact: return Color.clear
+        case .subtle: return Color.clear
+        }
+    }
+    
+    private var borderWidth: CGFloat {
+        switch style {
+        case .standard: return 1.0
+        case .compact: return 0
+        case .subtle: return 0
+        }
+    }
+    
+    private var shadowColor: Color {
+        switch style {
+        case .standard: return Color.black.opacity(0.1) // Subtle shadow for depth
+        case .compact: return Color.clear
+        case .subtle: return Color.clear
+        }
+    }
+    
+    private var shadowRadius: CGFloat {
+        switch style {
+        case .standard: return 2
+        case .compact: return 0
+        case .subtle: return 0
+        }
+    }
+    
+    private var shadowOffset: CGFloat {
+        switch style {
+        case .standard: return 1
+        case .compact: return 0
         case .subtle: return 0
         }
     }
