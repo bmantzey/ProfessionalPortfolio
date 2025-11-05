@@ -74,13 +74,13 @@ final class AuthenticationViewModel {
         // Validate early and return without toggling isSigningIn
         let emailTrimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !emailTrimmed.isEmpty, !password.isEmpty else {
-            errorMessage = "Please enter your email and password."
+            errorMessage = String(localized: "Please enter your email and password.")
             isAuthenticated = false
             return
         }
         
         guard isEmailValid else {
-            errorMessage = "Please enter a valid email address."
+            errorMessage = String(localized: "Please enter a valid email address.")
             isAuthenticated = false
             password = "" // Clear password when email is invalid
             return
@@ -94,7 +94,7 @@ final class AuthenticationViewModel {
             isAuthenticated = success
             
             if !success {
-                errorMessage = "Invalid email or password."
+                errorMessage = String(localized: "Invalid email or password.")
             }
         } catch {
             isAuthenticated = false
@@ -128,18 +128,18 @@ final class AuthenticationViewModel {
         // Validate early and return without toggling isSigningIn
         guard isEmailValid, isPasswordValid, !confirmPassword.isEmpty else {
             if !isEmailValid {
-                errorMessage = "Please enter a valid email address."
+                errorMessage = String(localized: "Please enter a valid email address.")
             } else if !isPasswordValid {
-                errorMessage = "Please create a stronger password."
+                errorMessage = String(localized: "Please create a stronger password.")
             } else {
-                errorMessage = "Please fill in all fields."
+                errorMessage = String(localized: "Please fill in all fields.")
             }
             isAuthenticated = false
             return
         }
         
         guard password == confirmPassword else {
-            errorMessage = "Passwords don't match."
+            errorMessage = String(localized: "Passwords don't match.")
             isAuthenticated = false
             confirmPassword = ""
             return
@@ -162,7 +162,7 @@ final class AuthenticationViewModel {
                 // Note: Keep email populated for convenience
                 // Note: User is NOT authenticated - they must sign in with their new account
             } else {
-                errorMessage = "Failed to create account. Please try again."
+                errorMessage = String(localized: "Failed to create account. Please try again.")
             }
         } catch {
             isAuthenticated = false
@@ -186,33 +186,17 @@ final class AuthenticationViewModel {
     private func passwordStrengthMessage(for password: String) -> String? {
         guard !password.isEmpty else { return nil }
         
-        var missingRequirements: [String] = []
+        let needsLength = password.count < 8
+        let needsUppercase = password.range(of: "[A-Z]", options: .regularExpression) == nil
+        let needsLowercase = password.range(of: "[a-z]", options: .regularExpression) == nil
+        let needsNumber = password.range(of: "[0-9]", options: .regularExpression) == nil
+        let needsSpecial = password.range(of: "[!@#$%^&*(),.?\":{}|<>]", options: .regularExpression) == nil
         
-        if password.count < 8 {
-            missingRequirements.append("8 characters")
-        }
-        
-        if password.range(of: "[A-Z]", options: .regularExpression) == nil {
-            missingRequirements.append("uppercase letter")
-        }
-        
-        if password.range(of: "[a-z]", options: .regularExpression) == nil {
-            missingRequirements.append("lowercase letter")
-        }
-        
-        if password.range(of: "[0-9]", options: .regularExpression) == nil {
-            missingRequirements.append("number")
-        }
-        
-        if password.range(of: "[!@#$%^&*(),.?\":{}|<>]", options: .regularExpression) == nil {
-            missingRequirements.append("special character")
-        }
-        
-        if missingRequirements.isEmpty {
+        if !needsLength && !needsUppercase && !needsLowercase && !needsNumber && !needsSpecial {
             return nil // Password is strong
         }
         
-        let requirementText = missingRequirements.joined(separator: ", ")
-        return "Password needs: \(requirementText)"
+        // Show a single, properly localized message that covers all requirements
+        return String(localized: "Use at least 8 characters with uppercase, lowercase, numbers, and symbols.")
     }
 }

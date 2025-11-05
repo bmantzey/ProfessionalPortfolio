@@ -12,6 +12,7 @@
 		C41604D52EAC3885005B0565 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C41604BE2EAC3885005B0565 /* README.md */; };
 		C41604D92EAC3885005B0565 /* ConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */; };
 		C41605262EAD5463005B0565 /* GoogleService-Info-Template.plist in Resources */ = {isa = PBXBuildFile; fileRef = C41605252EAD5463005B0565 /* GoogleService-Info-Template.plist */; };
+		C4541D4A2EBAA6F3007373B9 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C4541D492EBAA6F3007373B9 /* InfoPlist.xcstrings */; };
 		C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C45A43902EA9924500B02366 /* Localizable.xcstrings */; };
 		C4CBDA822EA9BBE80067E5B3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA812EA9BBE80067E5B3 /* FirebaseAuth */; };
 		C4CBDA842EA9BBE80067E5B3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA832EA9BBE80067E5B3 /* FirebaseFirestore */; };
@@ -42,6 +43,7 @@
 		C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationManager.swift; sourceTree = "<group>"; };
 		C41604BE2EAC3885005B0565 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C41605252EAD5463005B0565 /* GoogleService-Info-Template.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Template.plist"; sourceTree = "<group>"; };
+		C4541D492EBAA6F3007373B9 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		C45A43902EA9924500B02366 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		C4CBDA952EAADD510067E5B3 /* CLAUDE_CONTEXT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE_CONTEXT.md; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 			children = (
 				C4CBDA952EAADD510067E5B3 /* CLAUDE_CONTEXT.md */,
 				C45A43902EA9924500B02366 /* Localizable.xcstrings */,
+				C4541D492EBAA6F3007373B9 /* InfoPlist.xcstrings */,
 				C45A43792EA9891600B02366 /* DesignSystem */,
 				C4CE8A512EA6E43B00C8A3DF /* ProfessionalPortfolio */,
 				C4CE8A612EA6E43D00C8A3DF /* ProfessionalPortfolioTests */,
@@ -323,6 +326,7 @@
 				C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */,
 				C4CBDA962EAADD510067E5B3 /* CLAUDE_CONTEXT.md in Resources */,
 				C4CBDA882EA9BC2F0067E5B3 /* GoogleService-Info.plist in Resources */,
+				C4541D4A2EBAA6F3007373B9 /* InfoPlist.xcstrings in Resources */,
 				C41604D12EAC3885005B0565 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

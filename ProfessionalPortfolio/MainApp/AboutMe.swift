@@ -56,7 +56,7 @@ struct AboutMe: View {
                             HStack(spacing: theme.spacing12) {
                                 Spacer()
                                 
-                                Text("Please sign my guest book.")
+                                Text(String(localized: "Please sign my guest book."))
                                     .font(theme.body)
                                     .foregroundColor(theme.accentInfo)
                                 
@@ -68,7 +68,7 @@ struct AboutMe: View {
                             .card()
                         }
                         .buttonStyle(PlainButtonStyle())
-                        Text("I'm Brandon, a Senior Mobile Software Engineer who's been building iOS apps since the early App Store days. For over 16 years, I've specialized in Swift and Objective-C, working on production applications for companies like Garmin, TD Ameritrade/Schwab, Perficient, and GE. I love tackling complex problems with clean architecture and delivering features that make a real impact. From launching the Garmin Dive app to building the system that migrated 13.5 million TD Ameritrade customers to Schwab Mobile, I've led and contributed to successful projects across multiple industries.\n\nI’ve spent the past several months sharpening my skills with SwiftUI through intensive study and leveraging AI as a force multiplier in my development process. What used to take weeks now takes days, and I built this portfolio to demonstrate that synergy in action and showcase the result of that growth.\n\nI’m excited to connect with fellow developers and potential collaborators in the software development world. Feel free to explore, sign my Guest Log, check out my GitHub for the source code, and drop me a note via Email. I'd love to hear from you.")
+                        Text(String(localized: "about_me.bio_text"))
                             .font(theme.body)
                             .foregroundColor(theme.textSecondary)
                             .lineSpacing(4)
@@ -78,7 +78,7 @@ struct AboutMe: View {
                     }
                     LinkButton(
                         icon: "mail",
-                        title: "Email me with any comments.",
+                        title: String(localized: "Email me with any comments."),
                         url: URL(string: "mailto:bmantzey@mac.com?subject=Portfolio%20Contact&body=Hi%20Brandon,%0A%0AI%20saw%20your%20portfolio%20and%20would%20like%20to%20connect.")!
                     )
                 }
@@ -94,7 +94,7 @@ struct AboutMe: View {
                         } else {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
                                 .font(.system(size: 14, weight: .regular))
-                            Text("Sign Out")
+                            Text(String(localized: "Sign Out"))
                                 .font(.system(size: 14, weight: .regular))
                         }
                     }
@@ -116,7 +116,7 @@ struct AboutMe: View {
                 .padding(.top, theme.spacing8)
                 .padding(.bottom, theme.spacing16)
             }
-            .navigationTitle("Brandon Mantzey!")
+            .navigationTitle(String(localized: "Brandon Mantzey!"))
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [

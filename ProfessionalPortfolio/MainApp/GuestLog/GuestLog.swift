@@ -49,7 +49,7 @@ struct GuestLog: View {
             mapView
             signButton
         }
-        .navigationTitle("Guest Log")
+        .navigationTitle(String(localized: "Guest Log"))
         .onAppear {
             withAnimation(.easeInOut(duration: 1.0)) {
                 updateMapToFitAllEntries()
@@ -60,12 +60,12 @@ struct GuestLog: View {
                 updateMapToFitAllEntries()
             }
         }
-        .alert("Error", isPresented: .constant(guestLogService.lastError != nil)) {
-            Button("OK") {
+        .alert(String(localized: "Error"), isPresented: .constant(guestLogService.lastError != nil)) {
+            Button(String(localized: "OK")) {
                 guestLogService.clearError()
             }
         } message: {
-            Text(guestLogService.lastError?.localizedDescription ?? "An unknown error occurred")
+            Text(guestLogService.lastError?.localizedDescription ?? String(localized: "An unknown error occurred"))
         }
         .sheet(isPresented: $showingSignSheet) {
             SignGuestLogSheetView(
@@ -101,7 +101,7 @@ struct GuestLog: View {
         .overlay(
             Group {
                 if guestLogService.isLoading && guestLogService.entries.isEmpty {
-                    ProgressView("Loading guest entries...")
+                    ProgressView(String(localized: "Loading guest entries..."))
                         .padding()
                         .background(Color(.systemBackground))
                         .cornerRadius(8)
@@ -117,7 +117,7 @@ struct GuestLog: View {
                         selectedEntry = nil
                     }
                 )
-                .navigationTitle("Guest Entry")
+                .navigationTitle(String(localized: "Guest Entry"))
                 .navigationBarTitleDisplayMode(.inline)
             }
             .presentationDetents([.medium, .large])
@@ -153,11 +153,11 @@ struct GuestLog: View {
     
     private var buttonText: String {
         if !hasCurrentUserSigned {
-            return "Sign My Guest Log"
+            return String(localized: "Sign My Guest Log")
         } else if isShowingUserEntry {
-            return "Show All Entries"
+            return String(localized: "Show All Entries")
         } else {
-            return "Go To My Entry"
+            return String(localized: "Go To My Entry")
         }
     }
     
@@ -167,21 +167,21 @@ struct GuestLog: View {
                 mapStyle = .standard()
                 selectedMapStyleType = .standard
             }) {
-                Label("Standard", systemImage: selectedMapStyleType == .standard ? "checkmark" : "")
+                Label(String(localized: "Standard"), systemImage: selectedMapStyleType == .standard ? "checkmark" : "")
             }
             
             Button(action: { 
                 mapStyle = .hybrid()
                 selectedMapStyleType = .hybrid
             }) {
-                Label("Hybrid", systemImage: selectedMapStyleType == .hybrid ? "checkmark" : "")
+                Label(String(localized: "Hybrid"), systemImage: selectedMapStyleType == .hybrid ? "checkmark" : "")
             }
             
             Button(action: { 
                 mapStyle = .imagery()
                 selectedMapStyleType = .imagery
             }) {
-                Label("Satellite", systemImage: selectedMapStyleType == .imagery ? "checkmark" : "")
+                Label(String(localized: "Satellite"), systemImage: selectedMapStyleType == .imagery ? "checkmark" : "")
             }
         } label: {
             Image(systemName: "map")
@@ -382,7 +382,7 @@ struct GuestLogDetailView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 if isCurrentUserEntry {
                     if isEditing {
-                        Button("Cancel") {
+                        Button(String(localized: "Cancel")) {
                             // Reset to original values
                             editedName = currentEntry.name
                             editedCompany = currentEntry.companyOrAbout
@@ -410,7 +410,7 @@ struct GuestLogDetailView: View {
             }
             
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(isEditing ? "Save" : "Done") {
+                Button(isEditing ? String(localized: "Save") : String(localized: "Done")) {
                     if isEditing {
                         Task {
                             await saveEdits()
@@ -423,25 +423,25 @@ struct GuestLogDetailView: View {
             }
         }
         .confirmationDialog(
-            "Delete Entry",
+            String(localized: "Delete Entry"),
             isPresented: $showingDeleteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Delete", role: .destructive) {
+            Button(String(localized: "Delete"), role: .destructive) {
                 Task {
                     await deleteEntry()
                 }
             }
-            Button("Cancel", role: .cancel) { }
+            Button(String(localized: "Cancel"), role: .cancel) { }
         } message: {
-            Text("Are you sure you want to delete your guest log entry? This action cannot be undone.")
+            Text(String(localized: "Are you sure you want to delete your guest log entry? This action cannot be undone."))
         }
     }
     
     private var readOnlyView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Name")
+                Text(String(localized: "Name"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                 Text(currentEntry.name)
@@ -451,7 +451,7 @@ struct GuestLogDetailView: View {
             
             if !currentEntry.companyOrAbout.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Company/About")
+                    Text(String(localized: "Company/About"))
                         .font(.headline)
                         .foregroundColor(.secondary)
                     Text(currentEntry.companyOrAbout)
@@ -460,7 +460,7 @@ struct GuestLogDetailView: View {
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Message")
+                Text(String(localized: "Message"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                 Text(currentEntry.message)
@@ -468,7 +468,7 @@ struct GuestLogDetailView: View {
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date")
+                Text(String(localized: "Date"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                 Text(currentEntry.formattedDate)
@@ -481,23 +481,23 @@ struct GuestLogDetailView: View {
     private var editingView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Name")
+                Text(String(localized: "Name"))
                     .font(.headline)
                     .foregroundColor(.secondary)
-                TextField("Your name", text: $editedName)
+                TextField(String(localized: "Your name"), text: $editedName)
                     .textFieldStyle(.roundedBorder)
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Company/About")
+                Text(String(localized: "Company/About"))
                     .font(.headline)
                     .foregroundColor(.secondary)
-                TextField("Company or tell us about yourself", text: $editedCompany)
+                TextField(String(localized: "Company or tell us about yourself"), text: $editedCompany)
                     .textFieldStyle(.roundedBorder)
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Message")
+                Text(String(localized: "Message"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                 TextEditor(text: $editedMessage)
@@ -509,7 +509,7 @@ struct GuestLogDetailView: View {
             }
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Date")
+                Text(String(localized: "Date"))
                     .font(.headline)
                     .foregroundColor(.secondary)
                 Text(currentEntry.formattedDate)
@@ -593,10 +593,10 @@ struct NameField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Name:")
+            Text(String(localized: "Name:"))
                 .font(.subheadline)
                 .fontWeight(.medium)
-            TextField("Your name", text: $nameText)
+            TextField(String(localized: "Your name"), text: $nameText)
                 .textFieldStyle(.roundedBorder)
         }
     }
@@ -607,10 +607,10 @@ struct CompanyField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Company/About You:")
+            Text(String(localized: "Company/About You:"))
                 .font(.subheadline)
                 .fontWeight(.medium)
-            TextField("Company or tell us about yourself", text: $companyText)
+            TextField(String(localized: "Company or tell us about yourself"), text: $companyText)
                 .textFieldStyle(.roundedBorder)
         }
     }
@@ -621,7 +621,7 @@ struct MessageField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Message:")
+            Text(String(localized: "Message:"))
                 .font(.subheadline)
                 .fontWeight(.medium)
             TextEditor(text: $messageText)
@@ -647,7 +647,7 @@ struct GuestLogFormFields: View {
             CompanyField(companyText: $companyText)
             MessageField(messageText: $messageText)
             
-            Button("Sign Guest Log") {
+            Button(String(localized: "Sign Guest Log")) {
                 Task {
                     await onSubmit()
                 }
@@ -672,7 +672,7 @@ struct SignGuestLogSheetView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Text("Sign Guest Log")
+                Text(String(localized: "Sign Guest Log"))
                     .font(.title2)
                     .fontWeight(.semibold)
                 
@@ -682,14 +682,14 @@ struct SignGuestLogSheetView: View {
                             .font(.system(size: 64))
                             .foregroundColor(.blue)
                         
-                        Text("Location Required")
+                        Text(String(localized: "Location Required"))
                             .font(.headline)
                         
-                        Text("We need your location to add you to the guest log. This will only be requested once.")
+                        Text(String(localized: "We need your location to add you to the guest log. This will only be requested once."))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.secondary)
                         
-                        Button("Allow Location Access") {
+                        Button(String(localized: "Allow Location Access")) {
                             locationManager.requestLocationForSigning()
                         }
                         .buttonStyle(.borderedProminent)
@@ -703,14 +703,14 @@ struct SignGuestLogSheetView: View {
                             .font(.system(size: 64))
                             .foregroundColor(.red)
                         
-                        Text("Location Access Denied")
+                        Text(String(localized: "Location Access Denied"))
                             .font(.headline)
                         
-                        Text("Please enable location access in Settings to sign the guest log.")
+                        Text(String(localized: "Please enable location access in Settings to sign the guest log."))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.secondary)
                         
-                        Button("Open Settings") {
+                        Button(String(localized: "Open Settings")) {
                             if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(settingsUrl)
                             }
@@ -724,10 +724,10 @@ struct SignGuestLogSheetView: View {
                         ProgressView()
                             .controlSize(.large)
                         
-                        Text("Getting your location...")
+                        Text(String(localized: "Getting your location..."))
                             .font(.headline)
                         
-                        Text("This may take a moment")
+                        Text(String(localized: "This may take a moment"))
                             .foregroundColor(.secondary)
                     }
                     .padding()
@@ -738,14 +738,14 @@ struct SignGuestLogSheetView: View {
                             .font(.system(size: 64))
                             .foregroundColor(.orange)
                         
-                        Text("Location Error")
+                        Text(String(localized: "Location Error"))
                             .font(.headline)
                         
                         Text(error.localizedDescription)
                             .multilineTextAlignment(.center)
                             .foregroundColor(.secondary)
                         
-                        Button("Try Again") {
+                        Button(String(localized: "Try Again")) {
                             locationManager.requestLocationForSigning()
                         }
                         .buttonStyle(.bordered)
@@ -766,10 +766,10 @@ struct SignGuestLogSheetView: View {
                 } else {
                     // This shouldn't happen, but just in case
                     VStack(spacing: 16) {
-                        Text("Ready to sign")
+                        Text(String(localized: "Ready to sign"))
                             .font(.headline)
                         
-                        Button("Get Location") {
+                        Button(String(localized: "Get Location")) {
                             locationManager.requestLocationForSigning()
                         }
                         .buttonStyle(.borderedProminent)
@@ -781,7 +781,7 @@ struct SignGuestLogSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(String(localized: "Cancel")) {
                         dismiss()
                     }
                 }
@@ -882,9 +882,9 @@ enum LocationError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "Location permission was denied. Please enable it in Settings to sign the guest log."
+            return String(localized: "Location permission was denied. Please enable it in Settings to sign the guest log.")
         case .unknown:
-            return "An unknown location error occurred."
+            return String(localized: "An unknown location error occurred.")
         }
     }
 }

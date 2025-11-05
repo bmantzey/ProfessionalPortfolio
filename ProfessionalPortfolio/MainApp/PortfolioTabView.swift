@@ -31,20 +31,20 @@ struct PortfolioTabView: View {
         )) {
             AboutMe(selectedTab: $selectedTab)
                 .tabItem {
-                    Label("About Me", systemImage: "person.circle")
+                    Label(String(localized: "About Me"), systemImage: "person.circle")
                 }
                 .tag(Tab.aboutMe)
             
             GuestLog()
                 .tabItem {
-                    Label("Guest Log", systemImage: "book.closed")
+                    Label(String(localized: "Guest Log"), systemImage: "book.closed")
                 }
                 .tag(Tab.guestLog)
             
             Resume()
                 .id(resumeRefreshTrigger) // This will recreate the Resume view when refreshTrigger changes
                 .tabItem {
-                    Label("Resume", systemImage: "doc.text")
+                    Label(String(localized: "Resume"), systemImage: "doc.text")
                 }
                 .tag(Tab.resume)
         }

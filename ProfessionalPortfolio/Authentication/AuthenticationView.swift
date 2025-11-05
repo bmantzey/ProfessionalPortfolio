@@ -81,8 +81,8 @@ struct AuthenticationView: View {
     private var formFields: some View {
         VStack(spacing: theme.spacing16) {
             ThemedTextField(
-                title: "Email Address",
-                placeholder: "Enter your email",
+                title: String(localized: "Email Address"),
+                placeholder: String(localized: "Enter your email"),
                 text: $viewModel.email,
                 keyboardType: .emailAddress,
                 submitLabel: .next,
@@ -101,8 +101,8 @@ struct AuthenticationView: View {
             }
             
             ThemedTextField(
-                title: "Password",
-                placeholder: viewModel.isEmailValid ? "Enter your password" : "Complete email first",
+                title: String(localized: "Password"),
+                placeholder: viewModel.isEmailValid ? String(localized: "Enter your password") : String(localized: "Complete email first"),
                 text: $viewModel.password,
                 isSecure: true,
                 submitLabel: viewModel.isSignUpMode ? .next : .return,
@@ -127,8 +127,8 @@ struct AuthenticationView: View {
             
             if viewModel.isSignUpMode {
                 ThemedTextField(
-                    title: "Confirm Password",
-                    placeholder: "Confirm your password",
+                    title: String(localized: "Confirm Password"),
+                    placeholder: String(localized: "Confirm your password"),
                     text: $viewModel.confirmPassword,
                     isSecure: true,
                     errorMessage: confirmPasswordErrorMessage
@@ -176,9 +176,9 @@ struct AuthenticationView: View {
     
     private var buttonText: String {
         if viewModel.isSigningIn {
-            return viewModel.isSignUpMode ? "Creating Account..." : "Signing In..."
+            return viewModel.isSignUpMode ? String(localized: "Creating Account...") : String(localized: "Signing In...")
         } else {
-            return viewModel.isSignUpMode ? "Sign Up" : "Sign In"
+            return viewModel.isSignUpMode ? String(localized: "Sign Up") : String(localized: "Sign In")
         }
     }
     
@@ -188,11 +188,11 @@ struct AuthenticationView: View {
     
     private var accountToggleSection: some View {
         HStack(spacing: theme.spacing4) {
-            Text(viewModel.isSignUpMode ? "Try signing in again?" : "Don't have an account?")
+            Text(viewModel.isSignUpMode ? String(localized: "Try signing in again?") : String(localized: "Don't have an account?"))
                 .font(theme.callout)
                 .foregroundColor(theme.textSecondary)
             
-            Button(viewModel.isSignUpMode ? "Sign in" : "Create one") {
+            Button(viewModel.isSignUpMode ? String(localized: "Sign in") : String(localized: "Create one")) {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     viewModel.toggleMode()
                 }
@@ -206,7 +206,7 @@ struct AuthenticationView: View {
     
     private var emailErrorMessage: String? {
         guard !viewModel.email.isEmpty && !viewModel.isEmailValid else { return nil }
-        return "Please enter a valid email address"
+        return String(localized: "Please enter a valid email address")
     }
     
     private var passwordErrorMessage: String? {
@@ -224,7 +224,7 @@ struct AuthenticationView: View {
         guard viewModel.isSignUpMode else { return nil }
         guard !viewModel.confirmPassword.isEmpty else { return nil }
         guard viewModel.password != viewModel.confirmPassword else { return nil }
-        return "Passwords don't match"
+        return String(localized: "Passwords don't match")
     }
     
     // MARK: - Actions

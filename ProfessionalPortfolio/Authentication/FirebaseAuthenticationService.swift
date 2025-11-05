@@ -33,77 +33,77 @@ enum FirebaseAuthenticationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidEmail:
-            return "Please enter a valid email address."
+            return String(localized: "Please enter a valid email address.")
         case .wrongPassword:
-            return "Incorrect password. Please try again."
+            return String(localized: "Incorrect password. Please try again.")
         case .userNotFound:
-            return "No account found with this email address."
+            return String(localized: "No account found with this email address.")
         case .userDisabled:
-            return "This account has been disabled. Please contact support."
+            return String(localized: "This account has been disabled. Please contact support.")
         case .emailAlreadyInUse:
-            return "An account with this email already exists."
+            return String(localized: "An account with this email already exists.")
         case .weakPassword:
-            return "Password is too weak. Please choose a stronger password."
+            return String(localized: "Password is too weak. Please choose a stronger password.")
         case .networkError:
-            return "Network error. Please check your connection and try again."
+            return String(localized: "Network error. Please check your connection and try again.")
         case .tooManyRequests:
-            return "Too many failed attempts. Please try again later."
+            return String(localized: "Too many failed attempts. Please try again later.")
         case .operationNotAllowed:
-            return "Sign-in method is not enabled. Please contact support."
+            return String(localized: "Sign-in method is not enabled. Please contact support.")
         case .invalidCredential:
-            return "Invalid credentials provided. Please check your information."
+            return String(localized: "Invalid credentials provided. Please check your information.")
         case .userTokenExpired:
-            return "Your session has expired. Please sign in again."
+            return String(localized: "Your session has expired. Please sign in again.")
         case .accountExistsWithDifferentCredential:
-            return "An account already exists with this email using a different sign-in method."
+            return String(localized: "An account already exists with this email using a different sign-in method.")
         case .quotaExceeded:
-            return "Service quota exceeded. Please try again later."
+            return String(localized: "Service quota exceeded. Please try again later.")
         case .appNotAuthorized:
-            return "This app is not authorized. Please contact support."
+            return String(localized: "This app is not authorized. Please contact support.")
         case .keychainError:
-            return "Unable to access secure storage. Please try again."
+            return String(localized: "Unable to access secure storage. Please try again.")
         case .internalError:
-            return "An internal error occurred. Please try again."
+            return String(localized: "An internal error occurred. Please try again.")
         case .unknown:
-            return "Authentication failed. Please try again."
+            return String(localized: "Authentication failed. Please try again.")
         }
     }
     
     var recoverySuggestion: String? {
         switch self {
         case .invalidEmail:
-            return "Make sure your email address is correctly formatted."
+            return String(localized: "Make sure your email address is correctly formatted.")
         case .wrongPassword:
-            return "Try using 'Forgot Password' if you can't remember it."
+            return String(localized: "Try using 'Forgot Password' if you can't remember it.")
         case .userNotFound:
-            return "Double-check the email address or create a new account."
+            return String(localized: "Double-check the email address or create a new account.")
         case .userDisabled:
-            return "Contact customer support for account reactivation."
+            return String(localized: "Contact customer support for account reactivation.")
         case .emailAlreadyInUse:
-            return "Try signing in instead, or use a different email address."
+            return String(localized: "Try signing in instead, or use a different email address.")
         case .weakPassword:
-            return "Use at least 8 characters with uppercase, lowercase, numbers, and symbols."
+            return String(localized: "Use at least 8 characters with uppercase, lowercase, numbers, and symbols.")
         case .networkError:
-            return "Check your internet connection and try again."
+            return String(localized: "Check your internet connection and try again.")
         case .tooManyRequests(let retryAfter):
             if let retryAfter = retryAfter {
-                return "Wait \(Int(retryAfter)) seconds before trying again."
+                return String(localized: "Wait \(Int(retryAfter)) seconds before trying again.")
             }
-            return "Wait a few minutes before trying again."
+            return String(localized: "Wait a few minutes before trying again.")
         case .operationNotAllowed:
-            return "Contact support to enable this sign-in method."
+            return String(localized: "Contact support to enable this sign-in method.")
         case .invalidCredential:
-            return "Verify your email and password are correct."
+            return String(localized: "Verify your email and password are correct.")
         case .userTokenExpired:
-            return "Please sign out and sign in again."
+            return String(localized: "Please sign out and sign in again.")
         case .accountExistsWithDifferentCredential:
-            return "Try signing in with a different method (Google, Apple, etc.)."
+            return String(localized: "Try signing in with a different method (Google, Apple, etc.).")
         case .quotaExceeded, .appNotAuthorized, .internalError:
-            return "This is a temporary issue. Please try again in a few minutes."
+            return String(localized: "This is a temporary issue. Please try again in a few minutes.")
         case .keychainError:
-            return "Restart the app or check your device security settings."
+            return String(localized: "Restart the app or check your device security settings.")
         case .unknown:
-            return "If this persists, please contact support."
+            return String(localized: "If this persists, please contact support.")
         }
     }
     
