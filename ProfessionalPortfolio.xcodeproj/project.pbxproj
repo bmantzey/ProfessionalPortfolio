@@ -17,7 +17,6 @@
 		C4CBDA822EA9BBE80067E5B3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA812EA9BBE80067E5B3 /* FirebaseAuth */; };
 		C4CBDA842EA9BBE80067E5B3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA832EA9BBE80067E5B3 /* FirebaseFirestore */; };
 		C4CBDA862EA9BBE80067E5B3 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA852EA9BBE80067E5B3 /* FirebaseStorage */; };
-		C4CBDA882EA9BC2F0067E5B3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */; };
 		C4CBDA962EAADD510067E5B3 /* CLAUDE_CONTEXT.md in Resources */ = {isa = PBXBuildFile; fileRef = C4CBDA952EAADD510067E5B3 /* CLAUDE_CONTEXT.md */; };
 		C4FC215F2EAC361100424E05 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = C4FC215E2EAC361100424E05 /* .gitignore */; };
 /* End PBXBuildFile section */
@@ -326,7 +325,6 @@
 				C41605262EAD5463005B0565 /* GoogleService-Info-Template.plist in Resources */,
 				C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */,
 				C4CBDA962EAADD510067E5B3 /* CLAUDE_CONTEXT.md in Resources */,
-				C4CBDA882EA9BC2F0067E5B3 /* GoogleService-Info.plist in Resources */,
 				C4541D4A2EBAA6F3007373B9 /* InfoPlist.xcstrings in Resources */,
 				C41604D12EAC3885005B0565 /* README.md in Resources */,
 			);
