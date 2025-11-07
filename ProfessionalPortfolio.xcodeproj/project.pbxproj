@@ -202,7 +202,7 @@
 			buildPhases = (
 				C4CE8A4B2EA6E43B00C8A3DF /* Sources */,
 				C4CE8A4C2EA6E43B00C8A3DF /* Frameworks */,
-				C49CC46C2EBE584C00FCA0C7 /* ShellScript */,
+				C49CC46C2EBE584C00FCA0C7 /* Generate dSYMs for Binary Frameworks */,
 				C4CE8A4D2EA6E43B00C8A3DF /* Resources */,
 			);
 			buildRules = (
@@ -277,7 +277,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					C4CE8A4E2EA6E43B00C8A3DF = {
 						CreatedOnToolsVersion = 26.0.1;
@@ -350,22 +350,29 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		C49CC46C2EBE584C00FCA0C7 /* ShellScript */ = {
+		C49CC46C2EBE584C00FCA0C7 /* Generate dSYMs for Binary Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			alwaysOutOfDate = 1;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
 			);
+			name = "Generate dSYMs for Binary Frameworks";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DWARF_DSYM_FOLDER_PATH)/FirebaseFirestoreInternal.framework.dSYM",
+				"$(DWARF_DSYM_FOLDER_PATH)/absl.framework.dSYM",
+				"$(DWARF_DSYM_FOLDER_PATH)/grpc.framework.dSYM",
+				"$(DWARF_DSYM_FOLDER_PATH)/grpcpp.framework.dSYM",
+				"$(DWARF_DSYM_FOLDER_PATH)/openssl_grpc.framework.dSYM",
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\n# Generate dSYM files for Firebase binary frameworks (Debug version)\n\nset -e\n\necho \"====== dSYM Generation Debug Info ======\"\necho \"CONFIGURATION: ${CONFIGURATION}\"\necho \"BUILT_PRODUCTS_DIR: ${BUILT_PRODUCTS_DIR}\"\necho \"FRAMEWORKS_FOLDER_PATH: ${FRAMEWORKS_FOLDER_PATH}\"\necho \"DWARF_DSYM_FOLDER_PATH: ${DWARF_DSYM_FOLDER_PATH}\"\necho \"TARGET_BUILD_DIR: ${TARGET_BUILD_DIR}\"\necho \"========================================\"\n\n# Only run for archive builds\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then\n    echo \"Skipping dSYM generation for non-Release build\"\n    exit 0\nfi\n\n# Check if dsymutil is available\nif ! command -v dsymutil &> /dev/null; then\n    echo \"ERROR: dsymutil not found\"\n    exit 0\nfi\n\nFRAMEWORKS=(\n    \"FirebaseFirestoreInternal\"\n    \"absl\"\n    \"grpc\"\n    \"grpcpp\"\n    \"openssl_grpc\"\n)\n\necho \"Searching for frameworks...\"\n\n# Try multiple possible locations\nSEARCH_PATHS=(\n    \"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n    \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n    \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Frameworks\"\n)\n\nfor SEARCH_PATH in \"${SEARCH_PATHS[@]}\"; do\n    echo \"Checking path: ${SEARCH_PATH}\"\n    if [ -d \"${SEARCH_PATH}\" ]; then\n        echo \"  ✓ Path exists\"\n        ls -la \"${SEARCH_PATH}\" | grep -i \".framework\" || echo \"  No frameworks found\"\n    else\n        echo \"  ✗ Path does not exist\"\n    fi\ndone\n\n# Ensure dSYM output folder exists\nmkdir -p \"${DWARF_DSYM_FOLDER_PATH}\"\n\nfor FRAMEWORK_NAME in \"${FRAMEWORKS[@]}\"; do\n    echo \"\"\n    echo \"Processing: ${FRAMEWORK_NAME}\"\n    \n    FOUND=false\n    \n    for SEARCH_PATH in \"${SEARCH_PATHS[@]}\"; do\n        FRAMEWORK_PATH=\"${SEARCH_PATH}/${FRAMEWORK_NAME}.framework\"\n        FRAMEWORK_BINARY=\"${FRAMEWORK_PATH}/${FRAMEWORK_NAME}\"\n        \n        if [ -f \"${FRAMEWORK_BINARY}\" ]; then\n            echo \"  Found at: ${FRAMEWORK_PATH}\"\n            FOUND=true\n            \n            # Check if binary has debug info\n            if dwarfdump --uuid \"${FRAMEWORK_BINARY}\" 2>/dev/null; then\n                echo \"  Has UUID - attempting dSYM generation...\"\n                \n                DSYM_OUTPUT=\"${DWARF_DSYM_FOLDER_PATH}/${FRAMEWORK_NAME}.framework.dSYM\"\n                \n                if dsymutil \"${FRAMEWORK_BINARY}\" -o \"${DSYM_OUTPUT}\"; then\n                    echo \"  ✓ dSYM generated: ${DSYM_OUTPUT}\"\n                    \n                    # Verify it was created\n                    if [ -d \"${DSYM_OUTPUT}\" ]; then\n                        ls -lh \"${DSYM_OUTPUT}/Contents/Resources/DWARF/\"\n                    fi\n                else\n                    echo \"  ✗ dsymutil failed\"\n                fi\n            else\n                echo \"  ⚠️  No UUID found (binary may be stripped)\"\n            fi\n            \n            break\n        fi\n    done\n    \n    if [ \"$FOUND\" = false ]; then\n        echo \"  ✗ Framework not found in any search path\"\n    fi\ndone\n\necho \"\"\necho \"====== Final dSYM folder contents ======\"\nls -la \"${DWARF_DSYM_FOLDER_PATH}\" || echo \"dSYM folder is empty or doesn't exist\"\necho \"========================================\"\n";
+			shellScript = "#!/bin/bash\n\nset -e\n\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then\n    exit 0\nfi\n\nFRAMEWORKS=(\n    \"FirebaseFirestoreInternal\"\n    \"absl\"\n    \"grpc\"\n    \"grpcpp\"\n    \"openssl_grpc\"\n)\n\nFRAMEWORKS_PATH=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nmkdir -p \"${DWARF_DSYM_FOLDER_PATH}\"\n\necho \"Generating dSYMs with dsymutil...\"\n\nfor FRAMEWORK_NAME in \"${FRAMEWORKS[@]}\"; do\n    FRAMEWORK_BINARY=\"${FRAMEWORKS_PATH}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n    \n    if [ ! -f \"${FRAMEWORK_BINARY}\" ]; then\n        echo \"⚠️  Framework not found: ${FRAMEWORK_NAME}\"\n        continue\n    fi\n    \n    DSYM_PATH=\"${DWARF_DSYM_FOLDER_PATH}/${FRAMEWORK_NAME}.framework.dSYM\"\n    \n    # Remove existing dSYM if present\n    rm -rf \"${DSYM_PATH}\"\n    \n    # Use dsymutil to generate from the binary\n    # Use --flat to avoid UUID mismatches\n    if dsymutil --flat \"${FRAMEWORK_BINARY}\" -o \"${DSYM_PATH}\" 2>&1 | grep -v \"warning: no debug symbols\"; then\n        echo \"✓ Generated dSYM for ${FRAMEWORK_NAME}\"\n    else\n        echo \"⚠️  dsymutil had no symbols for ${FRAMEWORK_NAME}\"\n    fi\ndone\n\necho \"Done\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -414,6 +421,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -468,6 +476,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -479,6 +488,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -526,6 +536,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
@@ -542,6 +553,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = D77H469HEK;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProfessionalPortfolio/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SwiftFolio;
@@ -581,6 +593,7 @@
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D77H469HEK;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ProfessionalPortfolio/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SwiftFolio;
