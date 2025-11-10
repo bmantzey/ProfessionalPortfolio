@@ -11,9 +11,9 @@
 		C41604D12EAC3885005B0565 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C41604BE2EAC3885005B0565 /* README.md */; };
 		C41604D52EAC3885005B0565 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = C41604BE2EAC3885005B0565 /* README.md */; };
 		C41604D92EAC3885005B0565 /* ConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */; };
-		C41605262EAD5463005B0565 /* GoogleService-Info-Template.plist in Resources */ = {isa = PBXBuildFile; fileRef = C41605252EAD5463005B0565 /* GoogleService-Info-Template.plist */; };
 		C4541D4A2EBAA6F3007373B9 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C4541D492EBAA6F3007373B9 /* InfoPlist.xcstrings */; };
 		C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C45A43902EA9924500B02366 /* Localizable.xcstrings */; };
+		C49CC46D2EC0004100FCA0C7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */; };
 		C4CBDA822EA9BBE80067E5B3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA812EA9BBE80067E5B3 /* FirebaseAuth */; };
 		C4CBDA842EA9BBE80067E5B3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA832EA9BBE80067E5B3 /* FirebaseFirestore */; };
 		C4CBDA862EA9BBE80067E5B3 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C4CBDA852EA9BBE80067E5B3 /* FirebaseStorage */; };
@@ -41,7 +41,6 @@
 /* Begin PBXFileReference section */
 		C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationManager.swift; sourceTree = "<group>"; };
 		C41604BE2EAC3885005B0565 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		C41605252EAD5463005B0565 /* GoogleService-Info-Template.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-Template.plist"; sourceTree = "<group>"; };
 		C4541D492EBAA6F3007373B9 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		C45A43902EA9924500B02366 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C4CBDA872EA9BC2F0067E5B3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -178,7 +177,6 @@
 				C4FC215E2EAC361100424E05 /* .gitignore */,
 				C41604BD2EAC3885005B0565 /* ConfigurationManager.swift */,
 				C41604BE2EAC3885005B0565 /* README.md */,
-				C41605252EAD5463005B0565 /* GoogleService-Info-Template.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -322,11 +320,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				C4FC215F2EAC361100424E05 /* .gitignore in Resources */,
-				C41605262EAD5463005B0565 /* GoogleService-Info-Template.plist in Resources */,
 				C45A43912EA9924500B02366 /* Localizable.xcstrings in Resources */,
 				C4CBDA962EAADD510067E5B3 /* CLAUDE_CONTEXT.md in Resources */,
 				C4541D4A2EBAA6F3007373B9 /* InfoPlist.xcstrings in Resources */,
 				C41604D12EAC3885005B0565 /* README.md in Resources */,
+				C49CC46D2EC0004100FCA0C7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -546,6 +544,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -572,13 +571,14 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -587,6 +587,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = D77H469HEK;
@@ -612,13 +613,14 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
