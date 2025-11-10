@@ -196,6 +196,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C4CE8A722EA6E43E00C8A3DF /* Build configuration list for PBXNativeTarget "ProfessionalPortfolio" */;
 			buildPhases = (
+				C49CC46E2EC2609300FCA0C7 /* Copy GoogleService-Info.plist (Conditional) */,
 				C4CE8A4B2EA6E43B00C8A3DF /* Sources */,
 				C4CE8A4C2EA6E43B00C8A3DF /* Frameworks */,
 				C49CC46C2EBE584C00FCA0C7 /* Generate dSYMs for Binary Frameworks */,
@@ -367,6 +368,24 @@
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "#!/bin/bash\n\nset -e\n\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then\n    exit 0\nfi\n\nFRAMEWORKS=(\n    \"FirebaseFirestoreInternal\"\n    \"absl\"\n    \"grpc\"\n    \"grpcpp\"\n    \"openssl_grpc\"\n)\n\nFRAMEWORKS_PATH=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nmkdir -p \"${DWARF_DSYM_FOLDER_PATH}\"\n\necho \"Generating dSYMs with dsymutil...\"\n\nfor FRAMEWORK_NAME in \"${FRAMEWORKS[@]}\"; do\n    FRAMEWORK_BINARY=\"${FRAMEWORKS_PATH}/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}\"\n    \n    if [ ! -f \"${FRAMEWORK_BINARY}\" ]; then\n        echo \"⚠️  Framework not found: ${FRAMEWORK_NAME}\"\n        continue\n    fi\n    \n    DSYM_PATH=\"${DWARF_DSYM_FOLDER_PATH}/${FRAMEWORK_NAME}.framework.dSYM\"\n    \n    # Remove existing dSYM if present\n    rm -rf \"${DSYM_PATH}\"\n    \n    # Use dsymutil to generate from the binary\n    # Use --flat to avoid UUID mismatches\n    if dsymutil --flat \"${FRAMEWORK_BINARY}\" -o \"${DSYM_PATH}\" 2>&1 | grep -v \"warning: no debug symbols\"; then\n        echo \"✓ Generated dSYM for ${FRAMEWORK_NAME}\"\n    else\n        echo \"⚠️  dsymutil had no symbols for ${FRAMEWORK_NAME}\"\n    fi\ndone\n\necho \"Done\"\n";
+		};
+		C49CC46E2EC2609300FCA0C7 /* Copy GoogleService-Info.plist (Conditional) */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy GoogleService-Info.plist (Conditional)";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Path to your local Firebase config\nLOCAL_GOOGLE_SERVICE_INFO=\"${PROJECT_DIR}/YourApp/GoogleService-Info.plist\"\n\n# Path where Xcode expects it during build\nDEST_GOOGLE_SERVICE_INFO=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\n# 1️⃣ Check if Xcode Cloud already provided the file (through secure environment or injection)\nif [ -f \"${SRCROOT}/GoogleService-Info.plist\" ]; then\n    echo \"✅ Using GoogleService-Info.plist from environment (Xcode Cloud)\"\n    cp -f \"${SRCROOT}/GoogleService-Info.plist\" \"${DEST_GOOGLE_SERVICE_INFO}\"\n\n# 2️⃣ Else, if building locally and you have one in the repo\nelif [ -f \"${LOCAL_GOOGLE_SERVICE_INFO}\" ]; then\n    echo \"✅ Using local GoogleService-Info.plist\"\n    cp -f \"${LOCAL_GOOGLE_SERVICE_INFO}\" \"${DEST_GOOGLE_SERVICE_INFO}\"\n\n# 3️⃣ Otherwise, warn but don't fail build\nelse\n    echo \"⚠️  Warning: No GoogleService-Info.plist found. Firebase may not initialize correctly.\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
