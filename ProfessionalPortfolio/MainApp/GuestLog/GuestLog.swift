@@ -456,6 +456,8 @@ struct GuestLogDetailView: View {
                         .foregroundColor(.secondary)
                     Text(currentEntry.companyOrAbout)
                         .font(.body)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             
@@ -465,6 +467,8 @@ struct GuestLogDetailView: View {
                     .foregroundColor(.secondary)
                 Text(currentEntry.message)
                     .font(.body)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
             VStack(alignment: .leading, spacing: 8) {
