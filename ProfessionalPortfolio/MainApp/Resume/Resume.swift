@@ -28,6 +28,7 @@ struct Resume: View {
     
     var body: some View {
         PDFDocumentView(pdfURL: resumeURL)
+            .ignoresSafeArea(edges: .bottom) // Allow PDF to extend under tab bar
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
@@ -37,6 +38,7 @@ struct Resume: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
+                .ignoresSafeArea(edges: .bottom) // Allow gradient to extend under tab bar
             )
     }
 }
