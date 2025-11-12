@@ -47,7 +47,22 @@ struct GuestLog: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             mapView
-            signButton
+            
+            VStack(spacing: 12) {
+                Text("\(guestLogService.entries.count) Entries")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(.regularMaterial)
+                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    )
+                
+                signButton
+            }
         }
         .navigationTitle(String(localized: "Guest Log"))
         .onAppear {
